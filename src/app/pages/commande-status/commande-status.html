@@ -1,0 +1,24 @@
+<div class="status-container">
+  <h2>Suivi de votre commande</h2>
+
+  <div class="etapes">
+    <div
+      *ngFor="let etape of etapes; let i = index"
+      class="etape"
+      [class.active]="getIndexEtape() >= i"
+    >
+      <span class="etape-numero">{{ i + 1 }}</span>
+      <span class="etape-nom">{{ etape }}</span>
+    </div>
+  </div>
+
+  <p *ngIf="statutActuel === 'servie'" class="message-final">
+    Votre commande a été servie. Bon appétit ! 🍽️
+  </p>
+
+  <button *ngIf="statutActuel === 'servie'" (click)="telechargerFacture()">
+    Télécharger la facture
+  </button>
+
+  <button routerLink="/menu">Nouvelle commande</button>
+</div>

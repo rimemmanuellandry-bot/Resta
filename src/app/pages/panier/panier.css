@@ -1,0 +1,290 @@
+.panier-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 24px 16px 80px;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+.panier-container h2 {
+  color: #fff;
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+
+.panier-container > p {
+  color: #f0ece4;
+  margin: 0 0 20px;
+}
+
+.panier-container > div:first-of-type {
+  text-align: center;
+  padding: 40px 20px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 14px;
+}
+
+.panier-container > div:first-of-type p {
+  color: #6b6b6b;
+  margin-bottom: 16px;
+}
+
+.panier-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: #fff;
+  padding: 14px 16px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.panier-item span:first-child {
+  color: #1a3c2e;
+  font-weight: 600;
+  flex: 1;
+}
+
+.panier-item span:nth-child(2) {
+  color: #d4af37;
+  font-weight: 700;
+}
+
+.livraison-form,
+.paiement-choix,
+.panier-total {
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px;
+  margin-top: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.livraison-form h3,
+.paiement-choix h3 {
+  color: #1a3c2e;
+  font-size: 1.05rem;
+  margin: 0 0 14px;
+}
+
+.livraison-form input,
+.paiement-choix input {
+  width: 100%;
+  padding: 11px 13px;
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+}
+
+.livraison-form input:focus,
+.paiement-choix input:focus {
+  outline: none;
+  border-color: #1a3c2e;
+}
+
+.paiement-choix button {
+  padding: 10px 16px;
+  margin: 0 8px 12px 0;
+  border: 1.5px solid #ddd;
+  background: #fff;
+  color: #6b6b6b;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.paiement-choix button.active {
+  background: #1a3c2e;
+  border-color: #1a3c2e;
+  color: #fff;
+}
+
+.panier-total {
+  text-align: center;
+}
+
+.panier-total p {
+  color: #1a3c2e;
+  font-size: 1.2rem;
+  margin: 0 0 16px;
+}
+
+.panier-total button,
+.panier-container > div:first-of-type button {
+  width: 100%;
+  padding: 14px;
+  background: #1a3c2e;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease, opacity 0.15s ease;
+}
+
+.panier-total button:hover:not(:disabled),
+.panier-container > div:first-of-type button:hover {
+  background: #2a5643;
+}
+
+.panier-total button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.panier-item button {
+  padding: 6px 12px;
+  background: #fdecea;
+  color: #c0392b;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.panier-item button:hover {
+  opacity: 0.75;
+}
+.champ {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.livraison-form input.invalide,
+.paiement-choix input.invalide {
+  border-color: #c0392b;
+}
+
+.erreur-champ {
+  color: #c0392b;
+  font-size: 0.78rem;
+  margin: 0;
+  padding-left: 2px;
+}
+
+.panier-total .erreur {
+  color: #c0392b;
+  background: #fdecea;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 0.85rem;
+  margin: 0 0 12px;
+  text-align: center;
+}
+.allergies-form {
+  background: #fff;
+  border-radius: 16px;
+  padding: 22px 24px;
+  margin: 20px 0;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid #d4af37;
+}
+
+.allergies-form h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #1a3c2e;
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0 0 14px;
+}
+
+.allergies-form h3::before {
+  content: '⚠';
+  font-size: 1.1rem;
+  color: #d4af37;
+}
+
+.allergies-form textarea {
+  width: 100%;
+  padding: 13px 15px;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 0.92rem;
+  font-family: inherit;
+  color: #2b2b2b;
+  background: #fafafa;
+  resize: vertical;
+  box-sizing: border-box;
+  line-height: 1.5;
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.allergies-form textarea::placeholder {
+  color: #a3a3a3;
+  font-style: italic;
+}
+
+.allergies-form textarea:focus {
+  outline: none;
+  border-color: #1a3c2e;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(26, 60, 46, 0.1);
+}
+.panier-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.panier-item-nom {
+  flex: 1;
+  font-weight: 600;
+  color: #1a3c2e;
+}
+
+.panier-item-prix {
+  font-weight: 700;
+  color: #d4af37;
+  white-space: nowrap;
+}
+
+.quantite-controle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-quantite {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: #1a3c2e;
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.btn-quantite:hover {
+  background: #2a5643;
+  transform: scale(1.05);
+}
+
+.quantite-valeur {
+  min-width: 20px;
+  text-align: center;
+  font-weight: 700;
+  color: #2b2b2b;
+}

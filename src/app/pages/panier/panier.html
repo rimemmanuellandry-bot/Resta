@@ -1,0 +1,88 @@
+<div class="panier-container">
+  <h2>Mon Panier</h2>
+
+  <p *ngIf="panierService.table">Table n° {{ panierService.table }}</p>
+
+  <div *ngIf="panierService.panier.length === 0">
+    <p>Votre panier est vide.</p>
+    <button routerLink="/menu">Retour au menu</button>
+  </div>
+
+  <div *ngFor="let item of panierService.panier" class="panier-item">
+  <span class="panier-item-nom">{{ item.plat.nom }}</span>
+  <span class="panier-item-prix">{{ item.plat.prix * item.quantite }} FCFA</span>
+  <div class="quantite-controle">
+    <button class="btn-quantite" (click)="retirer(item.plat.id)">-</button>
+    <span class="quantite-valeur">{{ item.quantite }}</span>
+    <button class="btn-quantite" (click)="ajouter(item.plat)">+</button>
+  </div>
+</div>
+
+  <div *ngIf="panierService.mode === 'livraison' && panierService.panier.length > 0" class="livraison-form">
+    <h3>Informations de livraison</h3>
+
+    <div class="champ">
+      <input
+        type="text"
+        placeholder="Votre adresse"
+        [(ngModel)]="panierService.adresse"
+        [class.invalide]="erreurAdresse"
+        (blur)="validerAdresse()"
+      />
+      <p *ngIf="erreurAdresse" class="erreur-champ">{{ erreurAdresse }}</p>
+    </div>
+
+    <div class="champ">
+      <input
+        type="tel"
+        placeholder="Votre téléphone"
+        [(ngModel)]="panierService.telephone"
+        [class.invalide]="erreurTelephone"
+        (blur)="validerTelephone()"
+      />
+      <p *ngIf="erreurTelephone" class="erreur-champ">{{ erreurTelephone }}</p>
+    </div>
+  </div>
+
+  <div *ngIf="panierService.panier.length > 0" class="allergies-form">
+    <h3>Allergies ou maladies à signaler</h3>
+    <textarea
+      placeholder="Ex : allergie aux arachides, intolérance au gluten... (facultatif)"
+      [(ngModel)]="panierService.allergies"
+      rows="2"
+    ></textarea>
+  </div>
+
+  <div *ngIf="panierService.panier.length > 0" class="paiement-choix">
+    <h3>Moyen de paiement</h3>
+    <button
+      [class.active]="panierService.moyenPaiement === 'orange_money'"
+      (click)="panierService.moyenPaiement = 'orange_money'"
+    >
+      Orange Money
+    </button>
+    <button
+      [class.active]="panierService.moyenPaiement === 'mtn_momo'"
+      (click)="panierService.moyenPaiement = 'mtn_momo'"
+    >
+      MTN Mobile Money
+    </button>
+
+    <div class="champ" *ngIf="panierService.moyenPaiement">
+      <input
+        type="tel"
+        placeholder="Numéro pour le paiement"
+        [(ngModel)]="panierService.telephonePaiement"
+        [class.invalide]="erreurTelephonePaiement"
+        (blur)="validerTelephonePaiement()"
+      />
+      <p *ngIf="erreurTelephonePaiement" class="erreur-champ">{{ erreurTelephonePaiement }}</p>
+    </div>
+  </div>
+
+  <div *ngIf="panierService.panier.length > 0" class="panier-total">
+    <p *ngIf="erreur" class="erreur">{{ erreur }}</p>
+    <p><strong>Total : {{ panierService.getTotal() }} FCFA</strong></p>
+    <button (click)="commander()" [disabled]="!panierService.moyenPaiement">Commander</button>
+  </div>
+</div>

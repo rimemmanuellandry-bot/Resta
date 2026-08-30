@@ -1,0 +1,55 @@
+<div class="stats-container">
+  <h2>Chiffre d'affaires</h2>
+
+  <p *ngIf="!chargementTermine" class="chargement">Calcul en cours...</p>
+
+  <ng-container *ngIf="chargementTermine">
+    <div class="stats-grille">
+      <div class="stat-card">
+        <h3>Aujourd'hui</h3>
+        <p class="montant">{{ caJour }} FCFA</p>
+        <p class="nombre">{{ commandesJour }} commande(s)</p>
+      </div>
+
+      <div class="stat-card">
+        <h3>Cette semaine</h3>
+        <p class="montant">{{ caSemaine }} FCFA</p>
+        <p class="nombre">{{ commandesSemaine }} commande(s)</p>
+      </div>
+
+      <div class="stat-card">
+        <h3>Ce mois</h3>
+        <p class="montant">{{ caMois }} FCFA</p>
+        <p class="nombre">{{ commandesMois }} commande(s)</p>
+      </div>
+
+      <div class="stat-card">
+        <h3>Cette année</h3>
+        <p class="montant">{{ caAnnee }} FCFA</p>
+        <p class="nombre">{{ commandesAnnee }} commande(s)</p>
+      </div>
+    </div>
+
+    <div class="repartitions">
+      <div class="repartition-bloc">
+        <h3>CA par mode de paiement (30 derniers jours)</h3>
+        <div class="repartition-ligne" *ngFor="let ligne of caParPaiement">
+          <span>{{ ligne.moyen }}</span>
+          <span class="repartition-montant">{{ ligne.total }} FCFA</span>
+        </div>
+        <p *ngIf="caParPaiement.length === 0" class="vide">Aucune donnée.</p>
+      </div>
+
+      <div class="repartition-bloc">
+        <h3>CA par catégorie de plat (30 derniers jours)</h3>
+        <div class="repartition-ligne" *ngFor="let ligne of caParCategorie">
+          <span>{{ ligne.categorie }}</span>
+          <span class="repartition-montant">{{ ligne.total }} FCFA</span>
+        </div>
+        <p *ngIf="caParCategorie.length === 0" class="vide">Aucune donnée.</p>
+      </div>
+    </div>
+
+    <button class="btn-export" (click)="exporterCSV()">Exporter en CSV (30 derniers jours)</button>
+  </ng-container>
+</div>

@@ -1,0 +1,13 @@
+<div class="localite-container">
+  <h2>Où êtes-vous ?</h2>
+  <p>Choisissez votre ville pour voir les restaurants partenaires</p>
+
+  <p *ngIf="!chargementTermine" class="chargement">Chargement...</p>
+
+  <div class="localite-liste" *ngIf="chargementTermine">
+    <button *ngFor="let localite of localites" (click)="choisirLocalite(localite)">
+      {{ localite }}
+    </button>
+    <p *ngIf="localites.length === 0" class="vide">Aucune localité disponible pour le moment.</p>
+  </div>
+</div>

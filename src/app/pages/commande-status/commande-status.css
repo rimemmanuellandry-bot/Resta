@@ -1,0 +1,152 @@
+.status-container {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 32px 20px 60px;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+.status-container h2 {
+  text-align: center;
+  color: #fff;
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 0 0 32px;
+}
+
+/* Timeline verticale */
+.etapes {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  background: #fff;
+  border-radius: 16px;
+  padding: 8px 20px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12);
+}
+
+.etape {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 4px;
+}
+
+/* Ligne verticale reliant les cercles */
+.etape:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 21px;
+  top: 52px;
+  width: 2px;
+  height: calc(100% - 20px);
+  background: #e2e2e2;
+  z-index: 0;
+  transition: background 0.3s ease;
+}
+
+.etape.active:not(:last-child)::after {
+  background: #1a3c2e;
+}
+
+.etape-numero {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #eee;
+  color: #999;
+  font-weight: 700;
+  font-size: 0.95rem;
+  transition: background 0.3s ease, color 0.3s ease, transform 0.3s ease;
+}
+
+.etape-nom {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #b3b3b3;
+  text-transform: capitalize;
+  transition: color 0.3s ease;
+}
+
+.etape.active .etape-numero {
+  background: #1a3c2e;
+  color: #fff;
+  transform: scale(1.05);
+}
+
+.etape.active .etape-nom {
+  color: #1a3c2e;
+}
+
+/* L'étape la plus avancée est mise en avant en doré */
+.etape.active:last-child .etape-numero,
+.etape.active:has(+ .etape:not(.active)) .etape-numero {
+  background: #d4af37;
+}
+
+/* Message final */
+.message-final {
+  text-align: center;
+  background: #fff;
+  color: #1a3c2e;
+  font-weight: 600;
+  font-size: 1.05rem;
+  padding: 16px 20px;
+  border-radius: 14px;
+  margin: 24px 0 0;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid #d4af37;
+}
+
+/* Boutons */
+.status-container button {
+  display: block;
+  width: 100%;
+  margin-top: 16px;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.status-container button:first-of-type {
+  background: #d4af37;
+  color: #1a3c2e;
+}
+
+.status-container button:first-of-type:hover {
+  background: #e6c454;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(212, 175, 55, 0.35);
+}
+
+.status-container button:last-of-type {
+  background: #1a3c2e;
+  color: #fff;
+}
+
+.status-container button:last-of-type:hover {
+  background: #2a5643;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(26, 60, 46, 0.35);
+}
+
+@media (max-width: 480px) {
+  .status-container {
+    padding: 24px 14px 48px;
+  }
+
+  .etapes {
+    padding: 4px 14px;
+  }
+}

@@ -1,0 +1,76 @@
+.accueil-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  text-align: center;
+}
+
+.accueil-container h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 8px;
+}
+
+.accueil-container p {
+  color: #fff;
+  font-size: 1rem;
+  margin: 0 0 36px;
+}
+
+.accueil-container button {
+  width: 100%;
+  max-width: 320px;
+  padding: 16px;
+  margin-bottom: 16px;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.accueil-container button:first-of-type {
+  background: #1a3c2e;
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(26, 60, 46, 0.25);
+}
+
+.accueil-container button:first-of-type:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(26, 60, 46, 0.3);
+}
+
+.accueil-container button:last-of-type {
+  background: #fff;
+  color: #1a3c2e;
+  border: 2px solid #d4af37;
+}
+
+.accueil-container button:last-of-type:hover {
+  background: #fdf8ec;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 480px) {
+  .accueil-container h1 {
+    font-size: 1.6rem;
+  }
+}
+.logo-header {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.logo-icone {
+  width: 72px;
+  height: 72px;
+  border-radius: 16px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+}

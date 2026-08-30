@@ -1,0 +1,336 @@
+.admin-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 24px 16px 80px;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  color: #2b2b2b;
+}
+
+.admin-container h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 20px;
+  border-bottom: 2px solid #d4af37;
+  padding-bottom: 8px;
+}
+
+/* Commandes en cours */
+.commande-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.commande-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 10px;
+}
+
+.commande-header span:last-child {
+  color: #d4af37;
+  font-size: 1.05rem;
+}
+
+.commande-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 10px;
+  color: #6b6b6b;
+  font-size: 0.9rem;
+}
+
+.commande-card ul li {
+  padding: 3px 0;
+}
+
+.commande-card p {
+  margin: 0 0 12px;
+  font-size: 0.9rem;
+}
+
+.statut-boutons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.statut-boutons button {
+  padding: 8px 14px;
+  border: 1.5px solid #ddd;
+  background: #fff;
+  color: #6b6b6b;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.statut-boutons button:hover {
+  border-color: #1a3c2e;
+  color: #1a3c2e;
+}
+
+.statut-boutons button.active {
+  background: #1a3c2e;
+  border-color: #1a3c2e;
+  color: #fff;
+}
+
+/* Gestion du menu */
+.gestion-menu {
+  margin-top: 48px;
+}
+
+.gestion-menu form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 24px;
+  background: #fff;
+  padding: 18px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.gestion-menu form input {
+  flex: 1 1 160px;
+  padding: 10px 12px;
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-family: inherit;
+}
+
+.gestion-menu form input:focus {
+  outline: none;
+  border-color: #1a3c2e;
+}
+
+.gestion-menu form button[type="submit"] {
+  padding: 10px 20px;
+  background: #1a3c2e;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.gestion-menu form button[type="submit"]:hover {
+  background: #2a5643;
+}
+
+.gestion-menu form button[type="button"] {
+  padding: 10px 20px;
+  background: #fff;
+  color: #c0392b;
+  border: 1.5px solid #c0392b;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.gestion-menu form button[type="button"]:hover {
+  background: #fdecea;
+}
+
+.gestion-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.gestion-menu ul li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  background: #fff;
+  padding: 12px 16px;
+  border-radius: 10px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+  font-size: 0.92rem;
+}
+
+.gestion-menu ul li button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-left: 8px;
+  transition: opacity 0.15s ease;
+}
+
+.gestion-menu ul li button:first-of-type {
+  background: #fdf8ec;
+  color: #a3821b;
+}
+
+.gestion-menu ul li button:last-of-type {
+  background: #fdecea;
+  color: #c0392b;
+}
+
+.gestion-menu ul li button:hover {
+  opacity: 0.75;
+}
+
+@media (max-width: 480px) {
+  .gestion-menu form {
+    flex-direction: column;
+  }
+
+  .gestion-menu form input {
+    flex: 1 1 100%;
+  }
+}
+.allergies-alerte {
+  background: #fdecea;
+  color: #c0392b;
+  border-left: 4px solid #c0392b;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin: 8px 0;
+}
+.rien {
+  color: #fff;
+
+}
+.gestion-reservations {
+  margin-bottom: 40px;
+}
+
+.reservation-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px 18px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.reservation-header {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+  color: #1a3c2e;
+  margin-bottom: 6px;
+}
+
+.reservation-date {
+  color: #d4af37;
+  font-weight: 600;
+  margin: 0 0 4px;
+}
+
+.reservation-note {
+  color: #6b6b6b;
+  font-size: 0.88rem;
+  margin: 0 0 10px;
+}
+
+.reservation-boutons {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-confirmer {
+  background: #1a3c2e;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-confirmer:hover {
+  background: #2a5643;
+}
+
+.btn-annuler {
+  background: #fdecea;
+  color: #c0392b;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-annuler:hover {
+  background: #f9d6d2;
+}
+.btn-voir-stats {
+  display: block;
+  margin: 0 0 24px;
+  padding: 12px 20px;
+  background: #d4af37;
+  color: #1a3c2e;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+}
+
+.btn-voir-stats:hover {
+  background: #e6c454;
+}
+.statut-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.statut-en_attente {
+  background: #fff3cd;
+  color: #92660a;
+}
+
+.statut-confirmee {
+  background: #d4edda;
+  color: #1a3c2e;
+}
+
+.statut-annulee {
+  background: #fdecea;
+  color: #c0392b;
+}
+
+.btn-supprimer {
+  background: #6b6b6b;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-supprimer:hover {
+  background: #545454;
+}

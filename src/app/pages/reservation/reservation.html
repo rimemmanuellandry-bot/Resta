@@ -1,0 +1,84 @@
+<div class="inscription-container">
+  <div class="inscription-card">
+    <h2>Réserver une table</h2>
+    <p class="sous-titre">Choisissez votre créneau</p>
+
+    <div *ngIf="reservationConfirmee" class="confirmation">
+      <p>✓ Votre demande de réservation a bien été envoyée.</p>
+      <p>Le restaurant vous contactera pour la confirmer.</p>
+      <a routerLink="/bienvenue">Retour à l'accueil</a>
+    </div>
+
+    <form *ngIf="!reservationConfirmee" (ngSubmit)="envoyerReservation()">
+      <div class="ligne-double">
+        <div class="champ">
+          <label>Date</label>
+          <input
+            type="date"
+            [(ngModel)]="date"
+            name="date"
+            [class.invalide]="erreurDate"
+            (blur)="validerDate()"
+          />
+          <p *ngIf="erreurDate" class="erreur-champ">{{ erreurDate }}</p>
+        </div>
+
+        <div class="champ">
+          <label>Heure</label>
+          <input
+            type="time"
+            [(ngModel)]="heure"
+            name="heure"
+            [class.invalide]="erreurHeure"
+            (blur)="validerHeure()"
+          />
+          <p *ngIf="erreurHeure" class="erreur-champ">{{ erreurHeure }}</p>
+        </div>
+      </div>
+
+      <div class="champ">
+        <label>Nombre de personnes</label>
+        <input type="number" [(ngModel)]="nombrePersonnes" name="nombrePersonnes" min="1" />
+      </div>
+
+      <div class="champ">
+        <input
+          type="text"
+          [(ngModel)]="nom"
+          name="nom"
+          placeholder="Votre nom"
+          [class.invalide]="erreurNom"
+          (blur)="validerNom()"
+        />
+        <p *ngIf="erreurNom" class="erreur-champ">{{ erreurNom }}</p>
+      </div>
+
+      <div class="champ">
+        <input
+          type="tel"
+          [(ngModel)]="telephone"
+          name="telephone"
+          placeholder="Votre téléphone"
+          [class.invalide]="erreurTelephone"
+          (blur)="validerTelephone()"
+        />
+        <p *ngIf="erreurTelephone" class="erreur-champ">{{ erreurTelephone }}</p>
+      </div>
+
+      <div class="champ">
+        <textarea
+          [(ngModel)]="note"
+          name="note"
+          placeholder="Note (optionnel)"
+          rows="2"
+        ></textarea>
+      </div>
+
+      <p *ngIf="erreur" class="erreur">{{ erreur }}</p>
+
+      <button type="submit" [disabled]="chargement">
+        {{ chargement ? 'Envoi...' : 'Confirmer la réservation' }}
+      </button>
+    </form>
+  </div>
+</div>

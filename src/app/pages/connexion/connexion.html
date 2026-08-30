@@ -1,0 +1,29 @@
+<div class="inscription-container">
+  <div class="inscription-card">
+    <div class="logo-header">
+  <img src="icons/icon-192x192.png" alt="Resta" class="logo-icone" />
+</div>
+    <h2>Se connecter</h2>
+    <p class="sous-titre">Accédez à votre compte Resta</p>
+
+    <form (ngSubmit)="seConnecter()">
+      <div class="champ">
+        <input type="email" [(ngModel)]="email" name="email" placeholder="Adresse email" />
+      </div>
+
+      <div class="champ">
+        <input type="password" [(ngModel)]="motDePasse" name="motDePasse" placeholder="Mot de passe" />
+      </div>
+
+      <p *ngIf="erreur" class="erreur">{{ erreur }}</p>
+
+      <button type="submit" [disabled]="chargement">
+        {{ chargement ? 'Connexion...' : 'Se connecter' }}
+      </button>
+    </form>
+
+    <p class="lien-secondaire">
+      Pas encore de compte ? <a routerLink="/">S'inscrire</a>
+    </p>
+  </div>
+</div>

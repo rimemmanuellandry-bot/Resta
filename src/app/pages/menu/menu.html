@@ -1,0 +1,36 @@
+<div class="menu-container">
+  <h2>Notre Menu</h2>
+
+  <p *ngIf="table">Table n° {{ table }}</p>
+  <div class="panier-resume" *ngIf="panierService.panier.length > 0">
+    <p>{{ panierService.panier.length }} article(s) dans le panier</p>
+    <button routerLink="/panier">Voir mon panier</button>
+  </div>
+
+  <div class="recherche-barre" *ngIf="chargementTermine">
+    <input
+      type="text"
+      placeholder="Rechercher un plat..."
+      [(ngModel)]="recherche"
+    />
+  </div>
+
+  <p *ngIf="!chargementTermine" class="chargement">Chargement du menu...</p>
+
+  <ng-container *ngIf="chargementTermine">
+    <p *ngIf="categoriesAffichees.length === 0" class="aucun-resultat">
+      Aucun plat ne correspond à "{{ recherche }}".
+    </p>
+
+    <div class="categorie-section" *ngFor="let categorie of categoriesAffichees">
+      <h3 class="categorie-titre">{{ categorie.nom }}</h3>
+
+      <div class="plat-card" *ngFor="let plat of categorie.plats">
+        <h4>{{ plat.nom }}</h4>
+        <p>{{ plat.description }}</p>
+        <p class="prix">{{ plat.prix }} FCFA</p>
+        <button (click)="ajouterAuPanier(plat)">Ajouter au panier</button>
+      </div>
+    </div>
+  </ng-container>
+</div>

@@ -1,0 +1,152 @@
+.lien-secondaire {
+  text-align: center;
+  margin-top: 16px;
+  font-size: 0.9rem;
+  color: #6b6b6b;
+}
+
+.lien-secondaire a {
+  color: #1a3c2e;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.lien-secondaire a:hover {
+  text-decoration: underline;
+}
+.inscription-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+.inscription-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 36px 32px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.inscription-card h2 {
+  color: #1a3c2e;
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 0 0 6px;
+  text-align: center;
+}
+
+.sous-titre {
+  color: #6b6b6b;
+  font-size: 0.9rem;
+  text-align: center;
+  margin: 0 0 28px;
+}
+
+.champ {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 16px;
+}
+
+.champ input {
+  padding: 13px 15px;
+  border: 1.5px solid #ddd;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.champ input:focus {
+  outline: none;
+  border-color: #1a3c2e;
+  box-shadow: 0 0 0 3px rgba(26, 60, 46, 0.1);
+}
+
+.champ input.invalide {
+  border-color: #c0392b;
+}
+
+.erreur-champ {
+  color: #c0392b;
+  font-size: 0.78rem;
+  margin: 0;
+  padding-left: 2px;
+}
+
+.erreur {
+  color: #c0392b;
+  background: #fdecea;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 0.85rem;
+  margin: 4px 0 16px;
+  text-align: center;
+}
+
+.inscription-card button[type="submit"] {
+  width: 100%;
+  padding: 14px;
+  background: #1a3c2e;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.inscription-card button[type="submit"]:hover:not(:disabled) {
+  background: #2a5643;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(26, 60, 46, 0.3);
+}
+
+.inscription-card button[type="submit"]:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+.lien-secondaire {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 0.9rem;
+  color: #6b6b6b;
+}
+
+.lien-secondaire a {
+  color: #1a3c2e;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.lien-secondaire a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+  .inscription-card {
+    padding: 28px 22px;
+  }
+}
+.logo-header {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.logo-icone {
+  width: 72px;
+  height: 72px;
+  border-radius: 16px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+}

@@ -1,0 +1,56 @@
+<div class="inscription-container">
+  <div class="inscription-card">
+    <div class="logo-header">
+  <img src="icons/icon-192x192.png" alt="Resta" class="logo-icone" />
+</div>
+    <h2>Créer un compte</h2>
+    <p class="sous-titre">Rejoignez Resta pour commander dans vos restaurants préférés</p>
+
+    <form (ngSubmit)="sInscrire()">
+      <div class="champ">
+        <input
+          type="text"
+          [(ngModel)]="nom"
+          name="nom"
+          placeholder="Nom complet"
+          [class.invalide]="erreurNom"
+          (blur)="validerNom()"
+        />
+        <p *ngIf="erreurNom" class="erreur-champ">{{ erreurNom }}</p>
+      </div>
+
+      <div class="champ">
+        <input
+          type="email"
+          [(ngModel)]="email"
+          name="email"
+          placeholder="Adresse email"
+          [class.invalide]="erreurEmail"
+          (blur)="validerEmail()"
+        />
+        <p *ngIf="erreurEmail" class="erreur-champ">{{ erreurEmail }}</p>
+      </div>
+
+      <div class="champ">
+        <input
+          type="password"
+          [(ngModel)]="motDePasse"
+          name="motDePasse"
+          placeholder="Mot de passe (9 caractères min., avec majuscule, chiffre, symbole)"
+          [class.invalide]="erreurMotDePasse"
+          (blur)="validerMotDePasse()"
+        />
+        <p *ngIf="erreurMotDePasse" class="erreur-champ">{{ erreurMotDePasse }}</p>
+      </div>
+
+      <p *ngIf="erreur" class="erreur">{{ erreur }}</p>
+
+      <button type="submit" [disabled]="chargement">
+        {{ chargement ? 'Création en cours...' : 'S\'inscrire' }}
+      </button>
+    </form>
+    <p class="lien-secondaire">
+  Déjà un compte ? <a routerLink="/connexion">Se connecter</a>
+</p>
+  </div>
+</div>

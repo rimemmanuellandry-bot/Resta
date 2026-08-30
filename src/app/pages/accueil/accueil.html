@@ -1,0 +1,12 @@
+<div class="accueil-container">
+  <div class="logo-header">
+  <img src="icons/icon-192x192.png" alt="Resta" class="logo-icone" />
+</div>
+  <h1>Bienvenue sur Resta</h1>
+  <p>Comment souhaitez-vous commander ?</p>
+
+<button routerLink="/scan">Je suis au restaurant</button>
+<button routerLink="/localite">Je me fais livrer</button>
+<button [routerLink]="['/localite']" [queryParams]="{ intention: 'reservation' }">Réserver une table</button>
+<button [routerLink]="['/localite']" [queryParams]="{ intention: 'evenement' }">Privatiser la salle</button>
+  </div>

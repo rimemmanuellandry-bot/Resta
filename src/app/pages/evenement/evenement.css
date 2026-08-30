@@ -1,0 +1,14 @@
+.champ select {
+  padding: 13px 15px;
+  border: 1.5px solid #ddd;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.champ select:focus {
+  outline: none;
+  border-color: #1a3c2e;
+}

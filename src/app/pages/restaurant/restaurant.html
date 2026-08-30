@@ -1,0 +1,13 @@
+<div class="restaurant-container">
+  <h2>Restaurants à {{ localite }}</h2>
+
+  <p *ngIf="!chargementTermine" class="chargement">Chargement...</p>
+
+  <div class="restaurant-liste" *ngIf="chargementTermine">
+    <div class="restaurant-card" *ngFor="let restaurant of restaurants" (click)="choisirRestaurant(restaurant)">
+      <h3>{{ restaurant.nom }}</h3>
+      <p>{{ restaurant.adresse }}</p>
+    </div>
+    <p *ngIf="restaurants.length === 0" class="vide">Aucun restaurant disponible dans cette localité.</p>
+  </div>
+</div>

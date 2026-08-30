@@ -1,0 +1,91 @@
+<div class="inscription-container">
+  <div class="inscription-card">
+    <h2>Privatiser la salle</h2>
+    <p class="sous-titre">Décrivez votre événement, le restaurant vous répond</p>
+
+    <div *ngIf="demandeEnvoyee" class="confirmation">
+      <p>✓ Votre demande a bien été envoyée.</p>
+      <p>Le restaurant vous contactera pour en discuter.</p>
+      <a routerLink="/bienvenue">Retour à l'accueil</a>
+    </div>
+
+    <form *ngIf="!demandeEnvoyee" (ngSubmit)="envoyerDemande()">
+      <div class="champ">
+        <label>Type de prestation</label>
+        <select [(ngModel)]="typePrestation" name="typePrestation">
+          <option *ngFor="let type of typesDisponibles" [value]="type">{{ type }}</option>
+        </select>
+      </div>
+
+      <div class="ligne-double">
+        <div class="champ">
+          <label>Date</label>
+          <input
+            type="date"
+            [(ngModel)]="date"
+            name="date"
+            [class.invalide]="erreurDate"
+            (blur)="validerDate()"
+          />
+          <p *ngIf="erreurDate" class="erreur-champ">{{ erreurDate }}</p>
+        </div>
+
+        <div class="champ">
+          <label>Heure (optionnel)</label>
+          <input type="time" [(ngModel)]="heure" name="heure" />
+        </div>
+      </div>
+
+      <div class="ligne-double">
+        <div class="champ">
+          <label>Nombre de personnes</label>
+          <input type="number" [(ngModel)]="nombrePersonnes" name="nombrePersonnes" min="1" />
+        </div>
+
+        <div class="champ">
+          <label>Budget indicatif (FCFA)</label>
+          <input type="number" [(ngModel)]="budgetIndicatif" name="budgetIndicatif" min="0" />
+        </div>
+      </div>
+
+      <div class="champ">
+        <input
+          type="text"
+          [(ngModel)]="nom"
+          name="nom"
+          placeholder="Votre nom"
+          [class.invalide]="erreurNom"
+          (blur)="validerNom()"
+        />
+        <p *ngIf="erreurNom" class="erreur-champ">{{ erreurNom }}</p>
+      </div>
+
+      <div class="champ">
+        <input
+          type="tel"
+          [(ngModel)]="telephone"
+          name="telephone"
+          placeholder="Votre téléphone"
+          [class.invalide]="erreurTelephone"
+          (blur)="validerTelephone()"
+        />
+        <p *ngIf="erreurTelephone" class="erreur-champ">{{ erreurTelephone }}</p>
+      </div>
+
+      <div class="champ">
+        <textarea
+          [(ngModel)]="description"
+          name="description"
+          placeholder="Décoration, menu souhaité, sonorisation... (optionnel)"
+          rows="3"
+        ></textarea>
+      </div>
+
+      <p *ngIf="erreur" class="erreur">{{ erreur }}</p>
+
+      <button type="submit" [disabled]="chargement">
+        {{ chargement ? 'Envoi...' : 'Envoyer ma demande' }}
+      </button>
+    </form>
+  </div>
+</div>

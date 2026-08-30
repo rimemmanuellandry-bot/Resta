@@ -1,0 +1,112 @@
+
+  <div class="admin-container">
+  <button [routerLink]="['/statistiques']" [queryParams]="{ restaurant_id: restaurantId }" class="btn-voir-stats">
+    Voir le chiffre d'affaires
+  </button>
+
+  <h2>Commandes en cours</h2>
+
+  <div *ngFor="let commande of commandes" class="commande-card">
+    <div class="commande-header">
+      <span *ngIf="commande.mode === 'sur_place'">Table n° {{ commande.table_numero }}</span>
+      <span *ngIf="commande.mode === 'livraison'">
+        Livraison — {{ commande.adresse }} ({{ commande.telephone }})
+      </span>
+      <span>{{ commande.total }} FCFA</span>
+    </div>
+
+    <ul>
+      <li *ngFor="let item of commande.plats">
+        {{ item.plat.nom }} (x{{ item.quantite }})
+      </li>
+    </ul>
+
+      <p *ngIf="commande.allergies" class="allergies-alerte">
+    ⚠ Allergies/maladies signalées : {{ commande.allergies }}
+  </p>
+
+    <p>Statut actuel : <strong>{{ commande.statut }}</strong></p>
+
+    <div class="statut-boutons">
+      <button *ngFor="let etape of etapes" [class.active]="commande.statut === etape" (click)="changerStatut(commande, etape)">{{ etape }}</button>
+    </div>
+  </div>
+
+  <p *ngIf="commandes.length === 0" class="rien">Aucune commande pour le moment.</p>
+<section class="gestion-reservations">
+  <h2>Réservations</h2>
+
+  <div *ngFor="let reservation of reservations" class="reservation-card">
+    <div class="reservation-header">
+      <span>{{ reservation.nom }} — {{ reservation.nombre_personnes }} pers.</span>
+      <span>{{ reservation.telephone }}</span>
+    </div>
+    <p class="reservation-date">{{ reservation.date_heure | date: 'dd/MM/yyyy à HH:mm' }}</p>
+    <p *ngIf="reservation.note" class="reservation-note">Note : {{ reservation.note }}</p>
+
+    <span class="statut-badge" [ngClass]="'statut-' + reservation.statut">
+      {{ reservation.statut === 'en_attente' ? 'En attente' : (reservation.statut === 'confirmee' ? 'Confirmée' : 'Refusée') }}
+    </span>
+
+    <div class="reservation-boutons">
+      <button
+        *ngIf="reservation.statut === 'en_attente'"
+        (click)="changerStatutReservation(reservation, 'confirmee')"
+        class="btn-confirmer"
+      >
+        Confirmer
+      </button>
+      <button
+        *ngIf="reservation.statut === 'en_attente'"
+        (click)="changerStatutReservation(reservation, 'annulee')"
+        class="btn-annuler"
+      >
+        Refuser
+      </button>
+      <button (click)="supprimerReservation(reservation.id)" class="btn-supprimer">
+        Supprimer
+      </button>
+    </div>
+  </div>
+
+  <p *ngIf="reservations.length === 0">Aucune réservation.</p>
+</section>
+<section class="gestion-evenements">
+  <h2>Demandes de privatisation</h2>
+
+  <div *ngFor="let demande of demandesEvenement" class="reservation-card">
+    <div class="reservation-header">
+      <span>{{ demande.type_prestation }} — {{ demande.nom }} ({{ demande.nombre_personnes }} pers.)</span>
+      <span>{{ demande.telephone }}</span>
+    </div>
+    <p class="reservation-date">{{ demande.date_evenement | date: 'dd/MM/yyyy' }}<span *ngIf="demande.heure"> à {{ demande.heure }}</span></p>
+    <p *ngIf="demande.budget_indicatif" class="reservation-note">Budget indicatif : {{ demande.budget_indicatif }} FCFA</p>
+    <p *ngIf="demande.description" class="reservation-note">{{ demande.description }}</p>
+
+    <span class="statut-badge" [ngClass]="'statut-' + demande.statut">
+      {{ demande.statut === 'en_attente' ? 'En attente' : (demande.statut === 'confirmee' ? 'Confirmée' : 'Refusée') }}
+    </span>
+
+    <div class="reservation-boutons">
+      <button
+        *ngIf="demande.statut === 'en_attente'"
+        (click)="changerStatutEvenement(demande, 'confirmee')"
+        class="btn-confirmer"
+      >
+        Confirmer
+      </button>
+      <button
+        *ngIf="demande.statut === 'en_attente'"
+        (click)="changerStatutEvenement(demande, 'annulee')"
+        class="btn-annuler"
+      >
+        Refuser
+      </button>
+      <button (click)="supprimerDemandeEvenement(demande.id)" class="btn-supprimer">
+        Supprimer
+      </button>
+    </div>
+  </div>
+
+  <p *ngIf="demandesEvenement.length === 0">Aucune demande pour le moment.</p>
+</section>
