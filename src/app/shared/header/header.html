@@ -1,12 +1,13 @@
 <header class="app-header">
-     <div class="header-gauche">
+  <div class="header-gauche">
     <button *ngIf="afficherRetour" (click)="retour()" class="btn-retour" aria-label="Retour">
       ←
     </button>
-  <a [routerLink]="estConnecte ? '/bienvenue' : '/'" class="logo-lien">
-    <img src="icons/icon-192x192.png" alt="Resta" class="logo-icone" />
-    <span class="logo-texte">Resta</span>
-  </a>
+    <a [routerLink]="estConnecte ? '/bienvenue' : '/'" class="logo-lien">
+      <img src="icons/icon-192x192.png" alt="Resta" class="logo-icone" />
+      <span class="logo-texte">Resta</span>
+    </a>
+  </div>
 
   <nav class="header-liens" *ngIf="estAdmin">
     <a [routerLink]="['/admin']" [queryParams]="{ restaurant_id: restaurantId }">Admin</a>
