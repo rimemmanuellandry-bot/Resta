@@ -16,6 +16,7 @@ export class Inscription {
   motDePasse = '';
   erreur = '';
   chargement = false;
+  afficherMotDePasse = false;
 
   // erreurs par champ, affichées sous chaque input
   erreurNom = '';

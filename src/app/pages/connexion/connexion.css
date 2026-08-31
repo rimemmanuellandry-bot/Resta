@@ -150,3 +150,24 @@
   border-radius: 16px;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
 }
+.champ-mot-de-passe-wrapper {
+  position: relative;
+}
+
+.champ-mot-de-passe-wrapper input {
+  width: 100%;
+  padding-right: 40px;
+  box-sizing: border-box;
+}
+
+.btn-oeil {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1rem;
+  padding: 0;
+}

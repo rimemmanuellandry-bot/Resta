@@ -15,6 +15,7 @@ export class Connexion {
   motDePasse = '';
   erreur = '';
   chargement = false;
+  afficherMotDePasse = false;
 
   constructor(private router: Router) {}
 

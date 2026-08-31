@@ -32,16 +32,26 @@
       </div>
 
       <div class="champ">
-        <input
-          type="password"
-          [(ngModel)]="motDePasse"
-          name="motDePasse"
-          placeholder="Mot de passe (9 caractères min., avec majuscule, chiffre, symbole)"
-          [class.invalide]="erreurMotDePasse"
-          (blur)="validerMotDePasse()"
-        />
-        <p *ngIf="erreurMotDePasse" class="erreur-champ">{{ erreurMotDePasse }}</p>
-      </div>
+  <div class="champ-mot-de-passe-wrapper">
+    <input
+      [type]="afficherMotDePasse ? 'text' : 'password'"
+      [(ngModel)]="motDePasse"
+      name="motDePasse"
+      placeholder="Mot de passe (9 caractères min., avec majuscule, chiffre, symbole)"
+      [class.invalide]="erreurMotDePasse"
+      (blur)="validerMotDePasse()"
+    />
+    <button
+      type="button"
+      class="btn-oeil"
+      (click)="afficherMotDePasse = !afficherMotDePasse"
+      aria-label="Afficher/masquer le mot de passe"
+    >
+      {{ afficherMotDePasse ? '🙈' : '👁️' }}
+    </button>
+  </div>
+  <p *ngIf="erreurMotDePasse" class="erreur-champ">{{ erreurMotDePasse }}</p>
+</div>
 
       <p *ngIf="erreur" class="erreur">{{ erreur }}</p>
 

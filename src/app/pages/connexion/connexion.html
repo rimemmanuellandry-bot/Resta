@@ -12,7 +12,22 @@
       </div>
 
       <div class="champ">
-        <input type="password" [(ngModel)]="motDePasse" name="motDePasse" placeholder="Mot de passe" />
+        <div class="champ-mot-de-passe-wrapper">
+          <input
+            [type]="afficherMotDePasse ? 'text' : 'password'"
+            [(ngModel)]="motDePasse"
+            name="motDePasse"
+            placeholder="Mot de passe"
+          />
+          <button
+            type="button"
+            class="btn-oeil"
+            (click)="afficherMotDePasse = !afficherMotDePasse"
+            aria-label="Afficher/masquer le mot de passe"
+          >
+            {{ afficherMotDePasse ? '🙈' : '👁️' }}
+          </button>
+        </div>
       </div>
 
       <p *ngIf="erreur" class="erreur">{{ erreur }}</p>
