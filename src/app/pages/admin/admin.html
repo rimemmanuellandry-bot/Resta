@@ -110,3 +110,54 @@
 
   <p *ngIf="demandesEvenement.length === 0">Aucune demande pour le moment.</p>
 </section>
+<section class="gestion-menu">
+  <h2>Gestion du menu</h2>
+
+  <form (ngSubmit)="validerPlat()">
+    <input
+      type="text"
+      [(ngModel)]="nouveauPlat.nom"
+      name="nom"
+      placeholder="Nom du plat"
+    />
+    <input
+      type="number"
+      [(ngModel)]="nouveauPlat.prix"
+      name="prix"
+      placeholder="Prix (FCFA)"
+    />
+    <input
+      type="text"
+      [(ngModel)]="nouveauPlat.categorie"
+      name="categorie"
+      placeholder="Catégorie"
+    />
+    <input
+      type="text"
+      [(ngModel)]="nouveauPlat.description"
+      name="description"
+      placeholder="Description"
+    />
+
+    <button type="submit">
+      {{ platEnEditionId ? 'Enregistrer' : 'Ajouter' }}
+    </button>
+    <button type="button" *ngIf="platEnEditionId" (click)="annulerModification()">
+      Annuler
+    </button>
+  </form>
+
+  <ul>
+    <li *ngFor="let plat of plats">
+      <span>
+        <strong>{{ plat.nom }}</strong> — {{ plat.categorie }} — {{ plat.prix }} FCFA
+      </span>
+      <span>
+        <button (click)="commencerModification(plat)">Modifier</button>
+        <button (click)="supprimerPlat(plat.id)">Supprimer</button>
+      </span>
+    </li>
+  </ul>
+
+  <p *ngIf="plats.length === 0" class="rien">Aucun plat pour ce restaurant.</p>
+</section>
