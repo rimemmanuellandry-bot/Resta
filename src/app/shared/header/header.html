@@ -9,9 +9,8 @@
     </a>
   </div>
 
-  <nav class="header-liens" *ngIf="estAdmin">
-    <a [routerLink]="['/admin']" [queryParams]="{ restaurant_id: restaurantId }">Admin</a>
-    <a [routerLink]="['/statistiques']" [queryParams]="{ restaurant_id: restaurantId }">Statistiques</a>
+  <nav class="header-liens" *ngIf="estConnecte && !estAdmin">
+    <a routerLink="/mes-commandes">Mes commandes</a>
   </nav>
 
   <button *ngIf="estConnecte" (click)="seDeconnecter()" class="btn-deconnexion">

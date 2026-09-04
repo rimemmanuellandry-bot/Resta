@@ -22,7 +22,7 @@ export class Header implements OnInit {
 
   constructor(private router: Router, private location: Location) {}
 
-  async ngOnInit() {
+  ngOnInit() {
     this.majAffichageRetour(this.location.path());
 
     this.router.events
@@ -36,9 +36,25 @@ export class Header implements OnInit {
         this.majAffichageRetour(e.urlAfterRedirects);
       });
 
+    this.verifierSession();
+
+    supabase.auth.onAuthStateChange((event, session) => {
+      if (session) {
+        this.verifierSession();
+      } else {
+        this.estConnecte = false;
+        this.estAdmin = false;
+        this.restaurantId = null;
+      }
+    });
+  }
+
+  private async verifierSession() {
     const { data: { session } } = await supabase.auth.getSession();
 
     if (!session) {
+      this.estConnecte = false;
+      this.estAdmin = false;
       return;
     }
 
@@ -48,11 +64,14 @@ export class Header implements OnInit {
       .from('admins')
       .select('restaurant_id')
       .eq('user_id', session.user.id)
-      .single();
+      .maybeSingle();
 
     if (admin) {
       this.estAdmin = true;
       this.restaurantId = admin.restaurant_id;
+    } else {
+      this.estAdmin = false;
+      this.restaurantId = null;
     }
   }
 
