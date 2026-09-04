@@ -1,0 +1,52 @@
+<div class="mes-commandes-container">
+  <h2>Mes commandes</h2>
+
+  <p *ngIf="chargement" class="chargement">Chargement...</p>
+
+  <div *ngFor="let commande of commandes" class="commande-card">
+    <div class="commande-header">
+      <span *ngIf="commande.mode === 'sur_place'">Table n° {{ commande.table_numero }}</span>
+      <span *ngIf="commande.mode === 'livraison'">Livraison — {{ commande.adresse }}</span>
+      <span class="commande-total">{{ commande.total }} FCFA</span>
+    </div>
+
+    <p class="commande-date">
+      {{ commande.created_at | date: 'dd/MM/yyyy à HH:mm' }}
+    </p>
+
+    <ul>
+      <li *ngFor="let item of commande.plats">
+        {{ item.plat.nom }} (x{{ item.quantite }})
+      </li>
+    </ul>
+
+    <div class="statut-boutons">
+      <span
+        *ngFor="let etape of getEtapes(commande)"
+        class="etape-badge"
+        [class.active]="commande.statut === etape"
+      >
+        {{ etape }}
+      </span>
+    </div>
+
+    <div class="commande-boutons">
+      <button
+        *ngIf="peutAnnuler(commande)"
+        (click)="annuler(commande)"
+        class="btn-annuler"
+      >
+        Annuler
+      </button>
+      <button (click)="supprimer(commande)" class="btn-supprimer">
+        Supprimer
+      </button>
+    </div>
+  </div>
+
+  <p *ngIf="!chargement && commandes.length === 0" class="rien">
+    Vous n'avez aucune commande pour le moment.
+  </p>
+
+  <button routerLink="/menu" class="btn-nouvelle">Nouvelle commande</button>
+</div>

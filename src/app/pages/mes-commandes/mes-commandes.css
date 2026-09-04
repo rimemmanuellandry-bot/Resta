@@ -1,0 +1,184 @@
+.mes-commandes-container {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 32px 20px 60px;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+.mes-commandes-container h2 {
+  text-align: center;
+  color: #fff;
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 0 0 32px;
+}
+
+.chargement,
+.rien {
+  color: #fff;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.commande-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 18px 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12);
+}
+
+.commande-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-weight: 700;
+  color: #1a3c2e;
+  margin-bottom: 4px;
+}
+
+.commande-total {
+  color: #d4af37;
+  font-size: 1.05rem;
+}
+
+.commande-date {
+  color: #999;
+  font-size: 0.82rem;
+  margin: 0 0 10px;
+}
+
+.commande-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 12px;
+  color: #6b6b6b;
+  font-size: 0.9rem;
+}
+
+.commande-card ul li {
+  padding: 3px 0;
+}
+
+.statut-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  text-transform: capitalize;
+}
+
+.statut-reçue {
+  background: #fff3cd;
+  color: #92660a;
+}
+
+.statut-en-préparation,
+.statut-prête,
+.statut-en-route {
+  background: #d4edda;
+  color: #1a3c2e;
+}
+
+.statut-servie,
+.statut-livrée {
+  background: #d4af37;
+  color: #1a3c2e;
+}
+
+.statut-annulée {
+  background: #fdecea;
+  color: #c0392b;
+}
+
+.commande-boutons {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-annuler {
+  background: #fdecea;
+  color: #c0392b;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.btn-annuler:hover {
+  background: #f9d6d2;
+}
+
+.btn-supprimer {
+  background: #6b6b6b;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.btn-supprimer:hover {
+  background: #545454;
+}
+
+.btn-nouvelle {
+  display: block;
+  width: 100%;
+  margin-top: 16px;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  background: #1a3c2e;
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-nouvelle:hover {
+  background: #2a5643;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(26, 60, 46, 0.35);
+}
+
+@media (max-width: 480px) {
+  .mes-commandes-container {
+    padding: 24px 14px 48px;
+  }
+}
+.statut-boutons {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  margin-bottom: 12px;
+}
+
+.etape-badge {
+  padding: 8px 14px;
+  border: 1.5px solid #ddd;
+  background: #fff;
+  color: #6b6b6b;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  flex-shrink: 0;
+  text-transform: capitalize;
+}
+
+.etape-badge.active {
+  background: #1a3c2e;
+  border-color: #1a3c2e;
+  color: #fff;
+}
