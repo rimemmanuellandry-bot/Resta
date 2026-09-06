@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { PanierService } from '../../services/panier';
 import { supabase } from '../../supabase';
-// ⚠ retire la ligne : import jsPDF from 'jspdf';
 
 @Component({
   selector: 'app-commande-status',
@@ -12,11 +11,16 @@ import { supabase } from '../../supabase';
   styleUrl: './commande-status.css',
 })
 export class CommandeStatus implements OnInit {
-  etapes = ['reçue', 'en préparation', 'prête', 'servie'];
+  etapesSurPlace = ['reçue', 'en préparation', 'prête', 'servie'];
+  etapesLivraison = ['reçue', 'en préparation', 'prête', 'en route', 'livrée'];
   statutActuel: string = 'reçue';
   commande: any = null;
 
   constructor(public panierService: PanierService, private cdr: ChangeDetectorRef) {}
+
+  get etapes(): string[] {
+    return this.commande?.mode === 'livraison' ? this.etapesLivraison : this.etapesSurPlace;
+  }
 
   ngOnInit() {
     this.chargerStatut();
@@ -57,7 +61,7 @@ export class CommandeStatus implements OnInit {
       return;
     }
 
-    const { default: jsPDF } = await import('jspdf');   // ← chargé seulement ici
+    const { default: jsPDF } = await import('jspdf');
 
     const doc = new jsPDF();
     let y = 20;

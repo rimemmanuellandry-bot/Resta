@@ -16,7 +16,11 @@
     Votre commande a été servie. Bon appétit ! 🍽️
   </p>
 
-  <button *ngIf="statutActuel === 'servie'" (click)="telechargerFacture()">
+  <p *ngIf="statutActuel === 'livrée'" class="message-final">
+    Votre commande a été livrée. Bon appétit ! 🍽️
+  </p>
+
+  <button *ngIf="statutActuel === 'servie' || statutActuel === 'livrée'" (click)="telechargerFacture()">
     Télécharger la facture
   </button>
 
