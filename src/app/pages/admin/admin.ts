@@ -62,7 +62,8 @@ export class Admin implements OnInit {
   plats: Plat[] = [];
   demandesEvenement: DemandeEvenement[] = [];
   nouveauPlat = { nom: '', prix: 0, description: '', categorie: '' };
-  etapes = ['reçue', 'en préparation', 'prête', 'servie'];
+  etapesSurPlace = ['reçue', 'en préparation', 'prête', 'servie'];
+  etapesLivraison = ['reçue', 'en préparation', 'prête', 'en route', 'livrée'];
   platEnEditionId: number | null = null;
   restaurantId: string | null = null;
 
@@ -92,12 +93,17 @@ this.chargerReservations();
 }, 3000);
   }
 
+  getEtapes(commande: Commande): string[] {
+    return commande.mode === 'livraison' ? this.etapesLivraison : this.etapesSurPlace;
+  }
+
   async chargerCommandes() {
     const { data, error } = await supabase
       .from('commandes')
       .select('*')
       .eq('restaurant_id', this.restaurantId)
       .neq('statut', 'servie')
+      .neq('statut', 'livrée')
       .order('created_at', { ascending: false })
       .limit(20);
 
