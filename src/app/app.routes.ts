@@ -43,6 +43,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/commande-status/commande-status').then(m => m.CommandeStatus),
   },
   {
+    path: 'mes-commandes',
+    loadComponent: () => import('./pages/mes-commandes/mes-commandes').then(m => m.MesCommandes),
+  },
+  {
     path: 'admin',
     loadComponent: () => import('./pages/admin/admin').then(m => m.Admin),
     canActivate: [adminGuard],
