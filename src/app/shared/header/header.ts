@@ -15,6 +15,7 @@ export class Header implements OnInit {
   estAdmin = false;
   restaurantId: string | null = null;
   afficherRetour = false;
+  menuOuvert = false;
 
   private pagesSansRetour = ['/', '/bienvenue'];
   private navigationsInternes = 0;
@@ -34,6 +35,7 @@ export class Header implements OnInit {
           this.navigationsInternes++;
         }
         this.majAffichageRetour(e.urlAfterRedirects);
+        this.menuOuvert = false;
       });
 
     this.verifierSession();
@@ -47,6 +49,14 @@ export class Header implements OnInit {
         this.restaurantId = null;
       }
     });
+  }
+
+  toggleMenu() {
+    this.menuOuvert = !this.menuOuvert;
+  }
+
+  fermerMenu() {
+    this.menuOuvert = false;
   }
 
   private async verifierSession() {
@@ -100,6 +110,7 @@ export class Header implements OnInit {
     await supabase.auth.signOut();
     this.estConnecte = false;
     this.estAdmin = false;
+    this.menuOuvert = false;
     this.router.navigate(['/']);
   }
 }

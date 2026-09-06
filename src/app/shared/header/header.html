@@ -9,12 +9,20 @@
     </a>
   </div>
 
-  <nav class="header-liens" *ngIf="estConnecte && !estAdmin">
-    <a routerLink="/mes-commandes">Mes commandes</a>
-  </nav>
-
-  <button *ngIf="estConnecte" (click)="seDeconnecter()" class="btn-deconnexion">
-    Déconnexion
-  </button>
   <a *ngIf="!estConnecte" routerLink="/connexion" class="lien-connexion">Se connecter</a>
+
+  <button *ngIf="estConnecte" (click)="toggleMenu()" class="btn-menu" aria-label="Menu">
+    ☰
+  </button>
 </header>
+
+<div class="menu-overlay" *ngIf="menuOuvert" (click)="fermerMenu()"></div>
+
+<nav class="menu-lateral" [class.ouvert]="menuOuvert">
+  <button class="btn-fermer-menu" (click)="fermerMenu()" aria-label="Fermer">✕</button>
+
+  <a routerLink="/mes-commandes" *ngIf="!estAdmin" (click)="fermerMenu()">Mes commandes</a>
+  <a [routerLink]="['/admin']" [queryParams]="{ restaurant_id: restaurantId }" *ngIf="estAdmin" (click)="fermerMenu()">Admin</a>
+
+  <button (click)="seDeconnecter()" class="lien-deconnexion">Déconnexion</button>
+</nav>
