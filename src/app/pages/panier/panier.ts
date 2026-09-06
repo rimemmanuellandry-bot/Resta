@@ -5,6 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { PanierService } from '../../services/panier';
 import { supabase } from '../../supabase';
 import { Plat } from '../../services/panier';
+
 @Component({
   selector: 'app-panier',
   imports: [CommonModule, RouterLink, FormsModule],
@@ -86,6 +87,8 @@ export class Panier {
       return;
     }
 
+    const { data: userData } = await supabase.auth.getUser();
+
     const { data, error } = await supabase
       .from('commandes')
       .insert({
@@ -100,6 +103,7 @@ export class Panier {
         moyen_paiement: this.panierService.moyenPaiement,
         statut_paiement: 'en_attente',
         allergies: this.panierService.allergies || null,
+        user_id: userData.user?.id || null,
       })
       .select()
       .single();
