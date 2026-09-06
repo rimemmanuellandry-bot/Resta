@@ -102,6 +102,8 @@ export class Reservation implements OnInit {
 
     const dateHeure = new Date(`${this.date}T${this.heure}`);
 
+    const { data: userData } = await supabase.auth.getUser();
+
     const { error } = await supabase.from('reservations').insert({
       restaurant_id: this.restaurantId,
       nom: this.nom,
@@ -110,6 +112,7 @@ export class Reservation implements OnInit {
       nombre_personnes: this.nombrePersonnes,
       note: this.note || null,
       statut: 'en_attente',
+      user_id: userData.user?.id || null,
     });
 
     this.chargement = false;
