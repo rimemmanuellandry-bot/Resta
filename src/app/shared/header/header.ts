@@ -3,10 +3,11 @@ import { CommonModule, Location } from '@angular/common';
 import { Router, RouterLink, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { supabase } from '../../supabase';
+import { TranslateService, TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-header',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, TranslatePipe],
   templateUrl: './header.html',
   styleUrl: './header.css',
 })
@@ -21,7 +22,11 @@ export class Header implements OnInit {
   private navigationsInternes = 0;
   private premiereNavigation = true;
 
-  constructor(private router: Router, private location: Location) {}
+  constructor(
+    private router: Router,
+    private location: Location,
+    private translate: TranslateService
+  ) {}
 
   ngOnInit() {
     this.majAffichageRetour(this.location.path());
@@ -57,6 +62,10 @@ export class Header implements OnInit {
 
   fermerMenu() {
     this.menuOuvert = false;
+  }
+
+  changerLangue(langue: string) {
+    this.translate.use(langue);
   }
 
   private async verifierSession() {

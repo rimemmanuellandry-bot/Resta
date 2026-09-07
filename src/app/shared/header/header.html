@@ -9,7 +9,7 @@
     </a>
   </div>
 
-  <a *ngIf="!estConnecte" routerLink="/connexion" class="lien-connexion">Se connecter</a>
+  <a *ngIf="!estConnecte" routerLink="/connexion" class="lien-connexion">{{ 'header.seConnecter' | translate }}</a>
 
   <button *ngIf="estConnecte" (click)="toggleMenu()" class="btn-menu" aria-label="Menu">
     ☰
@@ -21,8 +21,7 @@
 <nav class="menu-lateral" [class.ouvert]="menuOuvert">
   <button class="btn-fermer-menu" (click)="fermerMenu()" aria-label="Fermer">✕</button>
 
-  <a routerLink="/mes-commandes" *ngIf="!estAdmin" (click)="fermerMenu()">Mes commandes</a>
-  <a [routerLink]="['/admin']" [queryParams]="{ restaurant_id: restaurantId }" *ngIf="estAdmin" (click)="fermerMenu()">Admin</a>
+  <a routerLink="/mes-commandes" *ngIf="!estAdmin" (click)="fermerMenu()">{{ 'header.mesCommandes' | translate }}</a>
+  <a [routerLink]="['/admin']" [queryParams]="{ restaurant_id: restaurantId }" *ngIf="estAdmin" (click)="fermerMenu()">{{ 'header.admin' | translate }}</a>
 
-  <button (click)="seDeconnecter()" class="lien-deconnexion">Déconnexion</button>
-</nav>
+  <div class="menu-langues">
