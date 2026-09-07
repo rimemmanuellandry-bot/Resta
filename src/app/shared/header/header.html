@@ -19,15 +19,33 @@
 <div class="menu-overlay" *ngIf="menuOuvert" (click)="fermerMenu()"></div>
 
 <nav class="menu-lateral" [class.ouvert]="menuOuvert">
-  <button class="btn-fermer-menu" (click)="fermerMenu()" aria-label="Fermer">✕</button>
-
-  <a routerLink="/mes-commandes" *ngIf="!estAdmin" (click)="fermerMenu()">{{ 'header.mesCommandes' | translate }}</a>
-  <a [routerLink]="['/admin']" [queryParams]="{ restaurant_id: restaurantId }" *ngIf="estAdmin" (click)="fermerMenu()">{{ 'header.admin' | translate }}</a>
-
-  <div class="menu-langues">
-    <button (click)="changerLangue('fr')">FR</button>
-    <button (click)="changerLangue('en')">EN</button>
+  <div class="menu-header">
+    <span class="menu-titre">Menu</span>
+    <button class="btn-fermer-menu" (click)="fermerMenu()" aria-label="Fermer">✕</button>
   </div>
 
-  <button (click)="seDeconnecter()" class="lien-deconnexion">{{ 'header.deconnexion' | translate }}</button>
+  <div class="menu-section">
+    <a routerLink="/mes-commandes" *ngIf="!estAdmin" (click)="fermerMenu()" class="menu-item">
+      <span class="menu-icone">🧾</span> {{ 'header.mesCommandes' | translate }}
+    </a>
+    <a [routerLink]="['/admin']" [queryParams]="{ restaurant_id: restaurantId }" *ngIf="estAdmin" (click)="fermerMenu()" class="menu-item">
+      <span class="menu-icone">⚙️</span> {{ 'header.admin' | translate }}
+    </a>
+  </div>
+
+  <div class="menu-separateur"></div>
+
+  <div class="menu-section">
+    <span class="menu-label">Langue</span>
+    <div class="menu-langues">
+      <button [class.actif]="langueActuelle === 'fr'" (click)="changerLangue('fr')">FR</button>
+      <button [class.actif]="langueActuelle === 'en'" (click)="changerLangue('en')">EN</button>
+    </div>
+  </div>
+
+  <div class="menu-separateur"></div>
+
+  <button (click)="seDeconnecter()" class="menu-item lien-deconnexion">
+    <span class="menu-icone">🚪</span> {{ 'header.deconnexion' | translate }}
+  </button>
 </nav>

@@ -17,6 +17,7 @@ export class Header implements OnInit {
   restaurantId: string | null = null;
   afficherRetour = false;
   menuOuvert = false;
+  langueActuelle = 'fr';
 
   private pagesSansRetour = ['/', '/bienvenue'];
   private navigationsInternes = 0;
@@ -65,6 +66,7 @@ export class Header implements OnInit {
   }
 
   changerLangue(langue: string) {
+    this.langueActuelle = langue;
     this.translate.use(langue);
   }
 
