@@ -25,3 +25,9 @@
   <a [routerLink]="['/admin']" [queryParams]="{ restaurant_id: restaurantId }" *ngIf="estAdmin" (click)="fermerMenu()">{{ 'header.admin' | translate }}</a>
 
   <div class="menu-langues">
+    <button (click)="changerLangue('fr')">FR</button>
+    <button (click)="changerLangue('en')">EN</button>
+  </div>
+
+  <button (click)="seDeconnecter()" class="lien-deconnexion">{{ 'header.deconnexion' | translate }}</button>
+</nav>
