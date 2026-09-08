@@ -4,5 +4,23 @@
     "deconnexion": "Déconnexion",
     "mesCommandes": "Mes commandes",
     "admin": "Admin"
+  },
+  "accueil": {
+    "titre": "Bienvenue sur Resta",
+    "sousTitre": "Comment souhaitez-vous commander ?",
+    "surPlace": "Je suis au restaurant",
+    "livraison": "Je me fais livrer",
+    "reservation": "Réserver une table",
+    "evenement": "Privatiser la salle"
+  },
+  "menu": {
+    "titre": "Notre Menu",
+    "table": "Table n° {{numero}}",
+    "articlesPanier": "{{nombre}} article(s) dans le panier",
+    "voirPanier": "Voir mon panier",
+    "rechercher": "Rechercher un plat...",
+    "chargement": "Chargement du menu...",
+    "aucunResultat": "Aucun plat ne correspond à \"{{recherche}}\".",
+    "ajouterPanier": "Ajouter au panier"
   }
 }

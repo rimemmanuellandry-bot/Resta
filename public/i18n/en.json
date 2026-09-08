@@ -4,5 +4,23 @@
     "deconnexion": "Log out",
     "mesCommandes": "My orders",
     "admin": "Admin"
+  },
+  "accueil": {
+    "titre": "Welcome to Resta",
+    "sousTitre": "How would you like to order?",
+    "surPlace": "I'm at the restaurant",
+    "livraison": "Deliver to me",
+    "reservation": "Book a table",
+    "evenement": "Book the whole venue"
+  },
+  "menu": {
+    "titre": "Our Menu",
+    "table": "Table #{{numero}}",
+    "articlesPanier": "{{nombre}} item(s) in cart",
+    "voirPanier": "View my cart",
+    "rechercher": "Search for a dish...",
+    "chargement": "Loading menu...",
+    "aucunResultat": "No dish matches \"{{recherche}}\".",
+    "ajouterPanier": "Add to cart"
   }
 }
