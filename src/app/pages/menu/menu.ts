@@ -4,10 +4,11 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 import { PanierService, Plat } from '../../services/panier';
 import { supabase } from '../../supabase';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-menu',
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, RouterLink, FormsModule, TranslatePipe],
   templateUrl: './menu.html',
   styleUrl: './menu.css',
 })

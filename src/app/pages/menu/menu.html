@@ -1,25 +1,25 @@
 <div class="menu-container">
-  <h2>Notre Menu</h2>
+  <h2>{{ 'menu.titre' | translate }}</h2>
 
-  <p *ngIf="table">Table n° {{ table }}</p>
+  <p *ngIf="table">{{ 'menu.table' | translate: { numero: table } }}</p>
   <div class="panier-resume" *ngIf="panierService.panier.length > 0">
-    <p>{{ panierService.panier.length }} article(s) dans le panier</p>
-    <button routerLink="/panier">Voir mon panier</button>
+    <p>{{ 'menu.articlesPanier' | translate: { nombre: panierService.panier.length } }}</p>
+    <button routerLink="/panier">{{ 'menu.voirPanier' | translate }}</button>
   </div>
 
   <div class="recherche-barre" *ngIf="chargementTermine">
     <input
       type="text"
-      placeholder="Rechercher un plat..."
+      [placeholder]="'menu.rechercher' | translate"
       [(ngModel)]="recherche"
     />
   </div>
 
-  <p *ngIf="!chargementTermine" class="chargement">Chargement du menu...</p>
+  <p *ngIf="!chargementTermine" class="chargement">{{ 'menu.chargement' | translate }}</p>
 
   <ng-container *ngIf="chargementTermine">
     <p *ngIf="categoriesAffichees.length === 0" class="aucun-resultat">
-      Aucun plat ne correspond à "{{ recherche }}".
+      {{ 'menu.aucunResultat' | translate: { recherche: recherche } }}
     </p>
 
     <div class="categorie-section" *ngFor="let categorie of categoriesAffichees">
@@ -29,7 +29,7 @@
         <h4>{{ plat.nom }}</h4>
         <p>{{ plat.description }}</p>
         <p class="prix">{{ plat.prix }} FCFA</p>
-        <button (click)="ajouterAuPanier(plat)">Ajouter au panier</button>
+        <button (click)="ajouterAuPanier(plat)">{{ 'menu.ajouterPanier' | translate }}</button>
       </div>
     </div>
   </ng-container>
