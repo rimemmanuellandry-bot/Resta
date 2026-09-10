@@ -2,11 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { supabase } from '../../supabase';
 
 @Component({
   selector: 'app-reservation',
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, TranslatePipe],
   templateUrl: './reservation.html',
   styleUrl: './reservation.css',
 })
@@ -28,7 +29,7 @@ export class Reservation implements OnInit {
   chargement = false;
   reservationConfirmee = false;
 
-  constructor(private route: ActivatedRoute) {}
+  constructor(private route: ActivatedRoute, private translate: TranslateService) {}
 
   ngOnInit() {
     this.restaurantId = this.route.snapshot.queryParams['restaurant_id'] || null;
@@ -36,13 +37,13 @@ export class Reservation implements OnInit {
 
   validerDate(): boolean {
     if (!this.date) {
-      this.erreurDate = 'La date est obligatoire.';
+      this.erreurDate = this.translate.instant('reservation.erreurDateRequise');
       return false;
     }
     const aujourdHui = new Date();
     aujourdHui.setHours(0, 0, 0, 0);
     if (new Date(this.date) < aujourdHui) {
-      this.erreurDate = 'La date ne peut pas être dans le passé.';
+      this.erreurDate = this.translate.instant('reservation.erreurDatePassee');
       return false;
     }
     this.erreurDate = '';
@@ -51,7 +52,7 @@ export class Reservation implements OnInit {
 
   validerHeure(): boolean {
     if (!this.heure) {
-      this.erreurHeure = "L'heure est obligatoire.";
+      this.erreurHeure = this.translate.instant('reservation.erreurHeureRequise');
       return false;
     }
     this.erreurHeure = '';
@@ -60,7 +61,7 @@ export class Reservation implements OnInit {
 
   validerNom(): boolean {
     if (!this.nom.trim()) {
-      this.erreurNom = 'Le nom est obligatoire.';
+      this.erreurNom = this.translate.instant('reservation.erreurNomRequis');
       return false;
     }
     this.erreurNom = '';
@@ -69,11 +70,11 @@ export class Reservation implements OnInit {
 
   validerTelephone(): boolean {
     if (!this.telephone.trim()) {
-      this.erreurTelephone = 'Le téléphone est obligatoire.';
+      this.erreurTelephone = this.translate.instant('reservation.erreurTelephoneRequis');
       return false;
     }
     if (!/^6\d{8}$/.test(this.telephone.trim())) {
-      this.erreurTelephone = 'Numéro invalide (9 chiffres, doit commencer par 6).';
+      this.erreurTelephone = this.translate.instant('reservation.erreurTelephoneInvalide');
       return false;
     }
     this.erreurTelephone = '';
@@ -89,12 +90,12 @@ export class Reservation implements OnInit {
     const telephoneValide = this.validerTelephone();
 
     if (!dateValide || !heureValide || !nomValide || !telephoneValide) {
-      this.erreur = 'Corrigez les champs signalés ci-dessus.';
+      this.erreur = this.translate.instant('reservation.erreurChampsSignales');
       return;
     }
 
     if (!this.restaurantId) {
-      this.erreur = 'Aucun restaurant sélectionné.';
+      this.erreur = this.translate.instant('reservation.erreurRestaurantManquant');
       return;
     }
 
@@ -119,7 +120,7 @@ export class Reservation implements OnInit {
 
     if (error) {
       console.error('Erreur lors de la réservation :', error);
-      this.erreur = 'Une erreur est survenue, réessayez.';
+      this.erreur = this.translate.instant('reservation.erreurEnvoi');
       return;
     }
 

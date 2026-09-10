@@ -2,11 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { supabase } from '../../supabase';
 
 @Component({
   selector: 'app-evenement',
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, TranslatePipe],
   templateUrl: './evenement.html',
   styleUrl: './evenement.css',
 })
@@ -31,7 +32,7 @@ export class Evenement implements OnInit {
 
   typesDisponibles = ['Anniversaire', 'Mariage', 'Séminaire', 'Repas d\'entreprise', 'Autre'];
 
-  constructor(private route: ActivatedRoute) {}
+  constructor(private route: ActivatedRoute, private translate: TranslateService) {}
 
   ngOnInit() {
     this.restaurantId = this.route.snapshot.queryParams['restaurant_id'] || null;
@@ -39,13 +40,13 @@ export class Evenement implements OnInit {
 
   validerDate(): boolean {
     if (!this.date) {
-      this.erreurDate = 'La date est obligatoire.';
+      this.erreurDate = this.translate.instant('evenement.erreurDateRequise');
       return false;
     }
     const aujourdHui = new Date();
     aujourdHui.setHours(0, 0, 0, 0);
     if (new Date(this.date) < aujourdHui) {
-      this.erreurDate = 'La date ne peut pas être dans le passé.';
+      this.erreurDate = this.translate.instant('evenement.erreurDatePassee');
       return false;
     }
     this.erreurDate = '';
@@ -54,7 +55,7 @@ export class Evenement implements OnInit {
 
   validerNom(): boolean {
     if (!this.nom.trim()) {
-      this.erreurNom = 'Le nom est obligatoire.';
+      this.erreurNom = this.translate.instant('evenement.erreurNomRequis');
       return false;
     }
     this.erreurNom = '';
@@ -63,11 +64,11 @@ export class Evenement implements OnInit {
 
   validerTelephone(): boolean {
     if (!this.telephone.trim()) {
-      this.erreurTelephone = 'Le téléphone est obligatoire.';
+      this.erreurTelephone = this.translate.instant('evenement.erreurTelephoneRequis');
       return false;
     }
     if (!/^6\d{8}$/.test(this.telephone.trim())) {
-      this.erreurTelephone = 'Numéro invalide (9 chiffres, doit commencer par 6).';
+      this.erreurTelephone = this.translate.instant('evenement.erreurTelephoneInvalide');
       return false;
     }
     this.erreurTelephone = '';
@@ -82,12 +83,12 @@ export class Evenement implements OnInit {
     const telephoneValide = this.validerTelephone();
 
     if (!dateValide || !nomValide || !telephoneValide) {
-      this.erreur = 'Corrigez les champs signalés ci-dessus.';
+      this.erreur = this.translate.instant('evenement.erreurChampsSignales');
       return;
     }
 
     if (!this.restaurantId) {
-      this.erreur = 'Aucun restaurant sélectionné.';
+      this.erreur = this.translate.instant('evenement.erreurRestaurantManquant');
       return;
     }
 
@@ -110,7 +111,7 @@ export class Evenement implements OnInit {
 
     if (error) {
       console.error('Erreur lors de l\'envoi de la demande :', error);
-      this.erreur = 'Une erreur est survenue, réessayez.';
+      this.erreur = this.translate.instant('evenement.erreurEnvoi');
       return;
     }
 
