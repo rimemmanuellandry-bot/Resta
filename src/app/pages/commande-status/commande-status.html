@@ -1,5 +1,5 @@
 <div class="status-container">
-  <h2>Suivi de votre commande</h2>
+  <h2>{{ 'commandeStatus.titre' | translate }}</h2>
 
   <div class="etapes">
     <div
@@ -8,21 +8,21 @@
       [class.active]="getIndexEtape() >= i"
     >
       <span class="etape-numero">{{ i + 1 }}</span>
-      <span class="etape-nom">{{ etape }}</span>
+      <span class="etape-nom">{{ etapesCommande.libelle(etape) }}</span>
     </div>
   </div>
 
   <p *ngIf="statutActuel === 'servie'" class="message-final">
-    Votre commande a été servie. Bon appétit ! 🍽️
+    {{ 'commandeStatus.messageServie' | translate }}
   </p>
 
   <p *ngIf="statutActuel === 'livrée'" class="message-final">
-    Votre commande a été livrée. Bon appétit ! 🍽️
+    {{ 'commandeStatus.messageLivree' | translate }}
   </p>
 
   <button *ngIf="statutActuel === 'servie' || statutActuel === 'livrée'" (click)="telechargerFacture()">
-    Télécharger la facture
+    {{ 'commandeStatus.telechargerFacture' | translate }}
   </button>
 
-  <button routerLink="/menu">Nouvelle commande</button>
+  <button routerLink="/menu">{{ 'commandeStatus.nouvelleCommande' | translate }}</button>
 </div>

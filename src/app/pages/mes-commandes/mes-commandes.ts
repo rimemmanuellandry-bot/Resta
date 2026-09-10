@@ -1,11 +1,13 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { TranslatePipe } from '@ngx-translate/core';
+import { EtapesCommandeService } from '../../services/etapes-commande';
 import { supabase } from '../../supabase';
 
 @Component({
   selector: 'app-mes-commandes',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, TranslatePipe],
   templateUrl: './mes-commandes.html',
   styleUrl: './mes-commandes.css',
 })
@@ -15,7 +17,7 @@ export class MesCommandes implements OnInit {
   etapesSurPlace = ['reçue', 'en préparation', 'prête', 'servie'];
   etapesLivraison = ['reçue', 'en préparation', 'prête', 'en route', 'livrée'];
 
-  constructor(private cdr: ChangeDetectorRef) {}
+  constructor(private cdr: ChangeDetectorRef, public etapesCommande: EtapesCommandeService) {}
 
   ngOnInit() {
     this.chargerCommandes();

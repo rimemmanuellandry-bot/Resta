@@ -1,12 +1,14 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { TranslatePipe } from '@ngx-translate/core';
 import { PanierService } from '../../services/panier';
+import { EtapesCommandeService } from '../../services/etapes-commande';
 import { supabase } from '../../supabase';
 
 @Component({
   selector: 'app-commande-status',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, TranslatePipe],
   templateUrl: './commande-status.html',
   styleUrl: './commande-status.css',
 })
@@ -16,7 +18,11 @@ export class CommandeStatus implements OnInit {
   statutActuel: string = 'reçue';
   commande: any = null;
 
-  constructor(public panierService: PanierService, private cdr: ChangeDetectorRef) {}
+  constructor(
+    public panierService: PanierService,
+    private cdr: ChangeDetectorRef,
+    public etapesCommande: EtapesCommandeService
+  ) {}
 
   get etapes(): string[] {
     return this.commande?.mode === 'livraison' ? this.etapesLivraison : this.etapesSurPlace;

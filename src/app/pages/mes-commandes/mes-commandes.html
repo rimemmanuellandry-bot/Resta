@@ -1,22 +1,26 @@
 <div class="mes-commandes-container">
-  <h2>Mes commandes</h2>
+  <h2>{{ 'mesCommandes.titre' | translate }}</h2>
 
-  <p *ngIf="chargement" class="chargement">Chargement...</p>
+  <p *ngIf="chargement" class="chargement">{{ 'mesCommandes.chargement' | translate }}</p>
 
   <div *ngFor="let commande of commandes" class="commande-card">
     <div class="commande-header">
-      <span *ngIf="commande.mode === 'sur_place'">Table n° {{ commande.table_numero }}</span>
-      <span *ngIf="commande.mode === 'livraison'">Livraison — {{ commande.adresse }}</span>
+      <span *ngIf="commande.mode === 'livraison'; else surPlace">
+        {{ 'mesCommandes.livraison' | translate: { adresse: commande.adresse } }}
+      </span>
+      <ng-template #surPlace>
+        <span>{{ 'mesCommandes.table' | translate: { numero: commande.table_numero } }}</span>
+      </ng-template>
       <span class="commande-total">{{ commande.total }} FCFA</span>
     </div>
 
     <p class="commande-date">
-      {{ commande.created_at | date: 'dd/MM/yyyy à HH:mm' }}
+      {{ commande.created_at | date: ('mesCommandes.dateFormat' | translate) }}
     </p>
 
     <ul>
       <li *ngFor="let item of commande.plats">
-        {{ item.plat.nom }} (x{{ item.quantite }})
+        {{ item.plat.nom }} {{ 'mesCommandes.quantite' | translate: { quantite: item.quantite } }}
       </li>
     </ul>
 
@@ -26,7 +30,7 @@
         class="etape-badge"
         [class.active]="commande.statut === etape"
       >
-        {{ etape }}
+        {{ etapesCommande.libelle(etape) }}
       </span>
     </div>
 
@@ -36,17 +40,17 @@
         (click)="annuler(commande)"
         class="btn-annuler"
       >
-        Annuler
+        {{ 'mesCommandes.annuler' | translate }}
       </button>
       <button (click)="supprimer(commande)" class="btn-supprimer">
-        Supprimer
+        {{ 'mesCommandes.supprimer' | translate }}
       </button>
     </div>
   </div>
 
   <p *ngIf="!chargement && commandes.length === 0" class="rien">
-    Vous n'avez aucune commande pour le moment.
+    {{ 'mesCommandes.aucuneCommande' | translate }}
   </p>
 
-  <button routerLink="/menu" class="btn-nouvelle">Nouvelle commande</button>
+  <button routerLink="/menu" class="btn-nouvelle">{{ 'mesCommandes.nouvelleCommande' | translate }}</button>
 </div>
