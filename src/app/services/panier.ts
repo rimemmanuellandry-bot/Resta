@@ -24,7 +24,7 @@ export class PanierService {
   mode: 'sur_place' | 'livraison' = 'sur_place';
   adresse: string = '';
   telephone: string = '';
-  moyenPaiement: 'orange_money' | 'mtn_momo' | null = null;
+  moyenPaiement: 'orange_money' | 'mtn_momo' | 'en_main' | null = null;
   telephonePaiement: string = '';
    allergies: string = '';
    restaurantId: string | null = null;
