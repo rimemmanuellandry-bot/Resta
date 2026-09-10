@@ -1,6 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
+import { TranslatePipe } from '@ngx-translate/core';
 import { supabase } from '../../supabase';
 
 interface RestaurantInfo {
@@ -13,7 +14,7 @@ interface RestaurantInfo {
 
 @Component({
   selector: 'app-restaurant',
-  imports: [CommonModule],
+  imports: [CommonModule, TranslatePipe],
   templateUrl: './restaurant.html',
   styleUrl: './restaurant.css',
 })
@@ -56,19 +57,19 @@ export class Restaurant implements OnInit {
     });
   }
 
- choisirRestaurant(restaurant: RestaurantInfo) {
-  if (this.intention === 'reservation') {
-    this.router.navigate(['/reservation'], {
-      queryParams: { restaurant_id: restaurant.id },
-    });
-  } else if (this.intention === 'evenement') {
-    this.router.navigate(['/evenement'], {
-      queryParams: { restaurant_id: restaurant.id },
-    });
-  } else {
-    this.router.navigate(['/menu'], {
-      queryParams: { restaurant_id: restaurant.id, mode: 'livraison' },
-    });
+  choisirRestaurant(restaurant: RestaurantInfo) {
+    if (this.intention === 'reservation') {
+      this.router.navigate(['/reservation'], {
+        queryParams: { restaurant_id: restaurant.id },
+      });
+    } else if (this.intention === 'evenement') {
+      this.router.navigate(['/evenement'], {
+        queryParams: { restaurant_id: restaurant.id },
+      });
+    } else {
+      this.router.navigate(['/menu'], {
+        queryParams: { restaurant_id: restaurant.id, mode: 'livraison' },
+      });
+    }
   }
-}
 }

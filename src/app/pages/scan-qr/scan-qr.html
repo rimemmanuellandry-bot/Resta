@@ -1,9 +1,13 @@
-<div class="scan-container">
-  <h2>Scannez le QR Code de votre table</h2>
+<div class="localite-container">
+  <h2>{{ 'localite.titre' | translate }}</h2>
+  <p>{{ 'localite.sousTitre' | translate }}</p>
 
-  <zxing-scanner
-    (scanSuccess)="onScanSuccess($event)"
-  ></zxing-scanner>
+  <p *ngIf="!chargementTermine" class="chargement">{{ 'localite.chargement' | translate }}</p>
 
-  <p>Placez le QR code devant votre caméra</p>
+  <div class="localite-liste" *ngIf="chargementTermine">
+    <button *ngFor="let localite of localites" (click)="choisirLocalite(localite)">
+      {{ localite }}
+    </button>
+    <p *ngIf="localites.length === 0" class="vide">{{ 'localite.aucuneLocalite' | translate }}</p>
+  </div>
 </div>

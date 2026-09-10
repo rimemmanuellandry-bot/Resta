@@ -1,11 +1,12 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
+import { TranslatePipe } from '@ngx-translate/core';
 import { supabase } from '../../supabase';
 
 @Component({
   selector: 'app-localite',
-  imports: [CommonModule],
+  imports: [CommonModule, TranslatePipe],
   templateUrl: './localite.html',
   styleUrl: './localite.css',
 })
