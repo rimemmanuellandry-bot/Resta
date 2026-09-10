@@ -1,6 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { supabase } from '../../supabase';
 
 interface LigneCommande {
@@ -13,7 +14,7 @@ interface LigneCommande {
 
 @Component({
   selector: 'app-statistiques',
-  imports: [CommonModule],
+  imports: [CommonModule, TranslatePipe],
   templateUrl: './statistiques.html',
   styleUrl: './statistiques.css',
 })
@@ -36,7 +37,11 @@ export class Statistiques implements OnInit {
   commandesRecentes: LigneCommande[] = [];
   chargementTermine = false;
 
-  constructor(private route: ActivatedRoute, private cdr: ChangeDetectorRef) {}
+  constructor(
+    private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef,
+    private translate: TranslateService
+  ) {}
 
   async ngOnInit() {
     this.restaurantId = this.route.snapshot.queryParams['restaurant_id'] || null;
@@ -89,6 +94,20 @@ export class Statistiques implements OnInit {
     this.cdr.detectChanges();
   }
 
+  // Traduit les valeurs brutes de moyen_paiement stockées en base
+  libellePaiement(moyen: string): string {
+    if (moyen === 'orange_money') {
+      return this.translate.instant('panier.orangeMoney');
+    }
+    if (moyen === 'mtn_momo') {
+      return this.translate.instant('panier.mtnMomo');
+    }
+    if (moyen === 'en_main') {
+      return this.translate.instant('statistiques.enMain');
+    }
+    return this.translate.instant('statistiques.nonSpecifie');
+  }
+
   private async calculerPeriode(debut: Date): Promise<{ total: number; nombre: number }> {
     const { data, error } = await supabase
       .from('commandes')
@@ -125,7 +144,7 @@ export class Statistiques implements OnInit {
     const categories = new Map<string, number>();
 
     for (const commande of commandes) {
-      const moyen = commande.moyen_paiement || 'Non spécifié';
+      const moyen = commande.moyen_paiement || 'non_specifie';
       paiements.set(moyen, (paiements.get(moyen) || 0) + commande.total);
 
       for (const item of commande.plats) {
@@ -146,10 +165,15 @@ export class Statistiques implements OnInit {
 
   exporterCSV() {
     const lignes = [
-      ['Date', 'Mode de paiement', 'Statut', 'Total (FCFA)'],
+      [
+        this.translate.instant('statistiques.csvColonneDate'),
+        this.translate.instant('statistiques.csvColonneMoyenPaiement'),
+        this.translate.instant('statistiques.csvColonneStatut'),
+        this.translate.instant('statistiques.csvColonneTotal'),
+      ],
       ...this.commandesRecentes.map(c => [
         new Date(c.created_at).toLocaleString('fr-FR'),
-        c.moyen_paiement || 'Non spécifié',
+        this.libellePaiement(c.moyen_paiement),
         c.statut,
         c.total.toString(),
       ]),

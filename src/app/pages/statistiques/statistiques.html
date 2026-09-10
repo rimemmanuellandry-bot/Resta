@@ -1,55 +1,55 @@
 <div class="stats-container">
-  <h2>Chiffre d'affaires</h2>
+  <h2>{{ 'statistiques.titre' | translate }}</h2>
 
-  <p *ngIf="!chargementTermine" class="chargement">Calcul en cours...</p>
+  <p *ngIf="!chargementTermine" class="chargement">{{ 'statistiques.calculEnCours' | translate }}</p>
 
   <ng-container *ngIf="chargementTermine">
     <div class="stats-grille">
       <div class="stat-card">
-        <h3>Aujourd'hui</h3>
+        <h3>{{ 'statistiques.aujourdhui' | translate }}</h3>
         <p class="montant">{{ caJour }} FCFA</p>
-        <p class="nombre">{{ commandesJour }} commande(s)</p>
+        <p class="nombre">{{ commandesJour }} {{ commandesJour === 1 ? ('statistiques.commandeSingulier' | translate) : ('statistiques.commandePluriel' | translate) }}</p>
       </div>
 
       <div class="stat-card">
-        <h3>Cette semaine</h3>
+        <h3>{{ 'statistiques.cetteSemaine' | translate }}</h3>
         <p class="montant">{{ caSemaine }} FCFA</p>
-        <p class="nombre">{{ commandesSemaine }} commande(s)</p>
+        <p class="nombre">{{ commandesSemaine }} {{ commandesSemaine === 1 ? ('statistiques.commandeSingulier' | translate) : ('statistiques.commandePluriel' | translate) }}</p>
       </div>
 
       <div class="stat-card">
-        <h3>Ce mois</h3>
+        <h3>{{ 'statistiques.ceMois' | translate }}</h3>
         <p class="montant">{{ caMois }} FCFA</p>
-        <p class="nombre">{{ commandesMois }} commande(s)</p>
+        <p class="nombre">{{ commandesMois }} {{ commandesMois === 1 ? ('statistiques.commandeSingulier' | translate) : ('statistiques.commandePluriel' | translate) }}</p>
       </div>
 
       <div class="stat-card">
-        <h3>Cette année</h3>
+        <h3>{{ 'statistiques.cetteAnnee' | translate }}</h3>
         <p class="montant">{{ caAnnee }} FCFA</p>
-        <p class="nombre">{{ commandesAnnee }} commande(s)</p>
+        <p class="nombre">{{ commandesAnnee }} {{ commandesAnnee === 1 ? ('statistiques.commandeSingulier' | translate) : ('statistiques.commandePluriel' | translate) }}</p>
       </div>
     </div>
 
     <div class="repartitions">
       <div class="repartition-bloc">
-        <h3>CA par mode de paiement (30 derniers jours)</h3>
+        <h3>{{ 'statistiques.caParPaiement' | translate }}</h3>
         <div class="repartition-ligne" *ngFor="let ligne of caParPaiement">
-          <span>{{ ligne.moyen }}</span>
+          <span>{{ libellePaiement(ligne.moyen) }}</span>
           <span class="repartition-montant">{{ ligne.total }} FCFA</span>
         </div>
-        <p *ngIf="caParPaiement.length === 0" class="vide">Aucune donnée.</p>
+        <p *ngIf="caParPaiement.length === 0" class="vide">{{ 'statistiques.aucuneDonnee' | translate }}</p>
       </div>
 
       <div class="repartition-bloc">
-        <h3>CA par catégorie de plat (30 derniers jours)</h3>
+        <h3>{{ 'statistiques.caParCategorie' | translate }}</h3>
         <div class="repartition-ligne" *ngFor="let ligne of caParCategorie">
           <span>{{ ligne.categorie }}</span>
           <span class="repartition-montant">{{ ligne.total }} FCFA</span>
         </div>
-        <p *ngIf="caParCategorie.length === 0" class="vide">Aucune donnée.</p>
+        <p *ngIf="caParCategorie.length === 0" class="vide">{{ 'statistiques.aucuneDonnee' | translate }}</p>
       </div>
     </div>
 
-    <button class="btn-export" (click)="exporterCSV()">Exporter en CSV (30 derniers jours)</button>
+    <button class="btn-export" (click)="exporterCSV()">{{ 'statistiques.exporterCSV' | translate }}</button>
   </ng-container>
 </div>

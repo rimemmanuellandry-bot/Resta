@@ -1,166 +1,176 @@
-
-  <div class="admin-container">
+<div class="admin-container">
   <button [routerLink]="['/statistiques']" [queryParams]="{ restaurant_id: restaurantId }" class="btn-voir-stats">
-    Voir le chiffre d'affaires
+    {{ 'admin.voirChiffreAffaires' | translate }}
   </button>
 
-  <h2>Commandes en cours</h2>
+  <h2>{{ 'admin.commandes.titre' | translate }}</h2>
 
   <div *ngFor="let commande of commandes" class="commande-card">
     <div class="commande-header">
-      <span *ngIf="commande.mode === 'sur_place'">Table n° {{ commande.table_numero }}</span>
-      <span *ngIf="commande.mode === 'livraison'">
-        Livraison — {{ commande.adresse }} ({{ commande.telephone }})
+      <span *ngIf="commande.mode === 'livraison'; else surPlaceCmd">
+        {{ 'admin.commandes.livraison' | translate: { adresse: commande.adresse, telephone: commande.telephone } }}
       </span>
+      <ng-template #surPlaceCmd>
+        <span>{{ 'admin.commandes.table' | translate: { numero: commande.table_numero } }}</span>
+      </ng-template>
       <span>{{ commande.total }} FCFA</span>
     </div>
 
     <ul>
       <li *ngFor="let item of commande.plats">
-        {{ item.plat.nom }} (x{{ item.quantite }})
+        {{ item.plat.nom }} {{ 'admin.commandes.quantite' | translate: { quantite: item.quantite } }}
       </li>
     </ul>
 
-      <p *ngIf="commande.allergies" class="allergies-alerte">
-    ⚠ Allergies/maladies signalées : {{ commande.allergies }}
-  </p>
+    <p *ngIf="commande.allergies" class="allergies-alerte">
+      {{ 'admin.commandes.allergiesAlerte' | translate: { allergies: commande.allergies } }}
+    </p>
 
-    <p>Statut actuel : <strong>{{ commande.statut }}</strong></p>
+    <p>{{ 'admin.commandes.statutActuelLabel' | translate }} <strong>{{ etapesCommande.libelle(commande.statut) }}</strong></p>
 
     <div class="statut-boutons">
-      <button *ngFor="let etape of getEtapes(commande)" [class.active]="commande.statut === etape" (click)="changerStatut(commande, etape)">{{ etape }}</button>
+      <button *ngFor="let etape of getEtapes(commande)" [class.active]="commande.statut === etape" (click)="changerStatut(commande, etape)">{{ etapesCommande.libelle(etape) }}</button>
     </div>
   </div>
 
-  <p *ngIf="commandes.length === 0" class="rien">Aucune commande pour le moment.</p>
-<section class="gestion-reservations">
-  <h2>Réservations</h2>
+  <p *ngIf="commandes.length === 0" class="rien">{{ 'admin.commandes.aucune' | translate }}</p>
 
-  <div *ngFor="let reservation of reservations" class="reservation-card">
-    <div class="reservation-header">
-      <span>{{ reservation.nom }} — {{ reservation.nombre_personnes }} pers.</span>
-      <span>{{ reservation.telephone }}</span>
+  <section class="gestion-reservations">
+    <h2>{{ 'admin.reservations.titre' | translate }}</h2>
+
+    <div *ngFor="let reservation of reservations" class="reservation-card">
+      <div class="reservation-header">
+        <span>{{ 'admin.reservations.info' | translate: { nom: reservation.nom, nombre: reservation.nombre_personnes } }}</span>
+        <span>{{ reservation.telephone }}</span>
+      </div>
+      <p class="reservation-date">{{ reservation.date_heure | date: ('admin.reservations.dateHeureFormat' | translate) }}</p>
+      <p *ngIf="reservation.note" class="reservation-note">{{ 'admin.reservations.noteLabel' | translate: { note: reservation.note } }}</p>
+
+      <span class="statut-badge" [ngClass]="'statut-' + reservation.statut">
+        {{ reservation.statut === 'en_attente' ? ('admin.reservations.statutEnAttente' | translate) : (reservation.statut === 'confirmee' ? ('admin.reservations.statutConfirmee' | translate) : ('admin.reservations.statutRefusee' | translate)) }}
+      </span>
+
+      <div class="reservation-boutons">
+        <button
+          *ngIf="reservation.statut === 'en_attente'"
+          (click)="changerStatutReservation(reservation, 'confirmee')"
+          class="btn-confirmer"
+        >
+          {{ 'admin.reservations.confirmer' | translate }}
+        </button>
+        <button
+          *ngIf="reservation.statut === 'en_attente'"
+          (click)="changerStatutReservation(reservation, 'annulee')"
+          class="btn-annuler"
+        >
+          {{ 'admin.reservations.refuser' | translate }}
+        </button>
+        <button (click)="supprimerReservation(reservation.id)" class="btn-supprimer">
+          {{ 'admin.reservations.supprimer' | translate }}
+        </button>
+      </div>
     </div>
-    <p class="reservation-date">{{ reservation.date_heure | date: 'dd/MM/yyyy à HH:mm' }}</p>
-    <p *ngIf="reservation.note" class="reservation-note">Note : {{ reservation.note }}</p>
 
-    <span class="statut-badge" [ngClass]="'statut-' + reservation.statut">
-      {{ reservation.statut === 'en_attente' ? 'En attente' : (reservation.statut === 'confirmee' ? 'Confirmée' : 'Refusée') }}
-    </span>
+    <p *ngIf="reservations.length === 0" class="Aucune">{{ 'admin.reservations.aucune' | translate }}</p>
+  </section>
 
-    <div class="reservation-boutons">
-      <button
-        *ngIf="reservation.statut === 'en_attente'"
-        (click)="changerStatutReservation(reservation, 'confirmee')"
-        class="btn-confirmer"
-      >
-        Confirmer
-      </button>
-      <button
-        *ngIf="reservation.statut === 'en_attente'"
-        (click)="changerStatutReservation(reservation, 'annulee')"
-        class="btn-annuler"
-      >
-        Refuser
-      </button>
-      <button (click)="supprimerReservation(reservation.id)" class="btn-supprimer">
-        Supprimer
-      </button>
+  <section class="gestion-evenements">
+    <h2>{{ 'admin.evenements.titre' | translate }}</h2>
+
+    <div *ngFor="let demande of demandesEvenement" class="reservation-card">
+      <div class="reservation-header">
+       <span>{{ 'admin.evenements.info' | translate: { type: libelleTypePrestation(demande.type_prestation), nom: demande.nom, nombre: demande.nombre_personnes } }}</span>
+        <span>{{ demande.telephone }}</span>
+      </div>
+      <p class="reservation-date">
+        {{ demande.date_evenement | date: ('admin.evenements.dateFormat' | translate) }}
+        <span *ngIf="demande.heure"> {{ 'admin.evenements.aHeureLabel' | translate }} {{ demande.heure }}</span>
+      </p>
+      <p *ngIf="demande.budget_indicatif" class="reservation-note">
+        {{ 'admin.evenements.budgetIndicatif' | translate: { budget: demande.budget_indicatif } }}
+      </p>
+      <p *ngIf="demande.description" class="reservation-note">{{ demande.description }}</p>
+
+      <span class="statut-badge" [ngClass]="'statut-' + demande.statut">
+        {{ demande.statut === 'en_attente' ? ('admin.reservations.statutEnAttente' | translate) : (demande.statut === 'confirmee' ? ('admin.reservations.statutConfirmee' | translate) : ('admin.reservations.statutRefusee' | translate)) }}
+      </span>
+
+      <div class="reservation-boutons">
+        <button
+          *ngIf="demande.statut === 'en_attente'"
+          (click)="changerStatutEvenement(demande, 'confirmee')"
+          class="btn-confirmer"
+        >
+          {{ 'admin.reservations.confirmer' | translate }}
+        </button>
+        <button
+          *ngIf="demande.statut === 'en_attente'"
+          (click)="changerStatutEvenement(demande, 'annulee')"
+          class="btn-annuler"
+        >
+          {{ 'admin.reservations.refuser' | translate }}
+        </button>
+        <button (click)="supprimerDemandeEvenement(demande.id)" class="btn-supprimer">
+          {{ 'admin.reservations.supprimer' | translate }}
+        </button>
+      </div>
     </div>
-  </div>
 
-  <p *ngIf="reservations.length === 0" class="Aucune">Aucune réservation.</p>
-</section>
-<section class="gestion-evenements">
-  <h2>Demandes de privatisation</h2>
+    <p *ngIf="demandesEvenement.length === 0" class="Aucune">{{ 'admin.evenements.aucune' | translate }}</p>
+  </section>
 
-  <div *ngFor="let demande of demandesEvenement" class="reservation-card">
-    <div class="reservation-header">
-      <span>{{ demande.type_prestation }} — {{ demande.nom }} ({{ demande.nombre_personnes }} pers.)</span>
-      <span>{{ demande.telephone }}</span>
+  <section class="gestion-menu">
+    <h2>{{ 'admin.menu.titre' | translate }}</h2>
+
+    <form (ngSubmit)="validerPlat()" class="form-plat">
+      <input
+        type="text"
+        [(ngModel)]="nouveauPlat.nom"
+        name="nom"
+        [placeholder]="'admin.menu.nomPlaceholder' | translate"
+      />
+      <input
+        type="number"
+        [(ngModel)]="nouveauPlat.prix"
+        name="prix"
+        [placeholder]="'admin.menu.prixPlaceholder' | translate"
+      />
+      <input
+        type="text"
+        [(ngModel)]="nouveauPlat.categorie"
+        name="categorie"
+        [placeholder]="'admin.menu.categoriePlaceholder' | translate"
+      />
+      <textarea
+        [(ngModel)]="nouveauPlat.description"
+        name="description"
+        [placeholder]="'admin.menu.descriptionPlaceholder' | translate"
+      ></textarea>
+
+      <div class="form-plat-boutons">
+        <button type="submit">
+          {{ platEnEditionId ? ('admin.menu.enregistrerModifications' | translate) : ('admin.menu.ajouterPlat' | translate) }}
+        </button>
+        <button type="button" *ngIf="platEnEditionId" (click)="annulerModification()">
+          {{ 'admin.menu.annuler' | translate }}
+        </button>
+      </div>
+    </form>
+
+    <div *ngFor="let plat of plats" class="plat-card">
+      <div class="plat-header">
+        <span class="plat-nom">{{ plat.nom }}</span>
+        <span class="plat-prix">{{ plat.prix }} FCFA</span>
+      </div>
+      <p class="plat-categorie">{{ plat.categorie }}</p>
+      <p class="plat-description">{{ plat.description }}</p>
+
+      <div class="plat-boutons">
+        <button (click)="commencerModification(plat)">{{ 'admin.menu.modifier' | translate }}</button>
+        <button (click)="supprimerPlat(plat.id)" class="btn-supprimer">{{ 'admin.menu.supprimer' | translate }}</button>
+      </div>
     </div>
-    <p class="reservation-date">{{ demande.date_evenement | date: 'dd/MM/yyyy' }}<span *ngIf="demande.heure"> à {{ demande.heure }}</span></p>
-    <p *ngIf="demande.budget_indicatif" class="reservation-note">Budget indicatif : {{ demande.budget_indicatif }} FCFA</p>
-    <p *ngIf="demande.description" class="reservation-note">{{ demande.description }}</p>
 
-    <span class="statut-badge" [ngClass]="'statut-' + demande.statut">
-      {{ demande.statut === 'en_attente' ? 'En attente' : (demande.statut === 'confirmee' ? 'Confirmée' : 'Refusée') }}
-    </span>
-
-    <div class="reservation-boutons">
-      <button
-        *ngIf="demande.statut === 'en_attente'"
-        (click)="changerStatutEvenement(demande, 'confirmee')"
-        class="btn-confirmer"
-      >
-        Confirmer
-      </button>
-      <button
-        *ngIf="demande.statut === 'en_attente'"
-        (click)="changerStatutEvenement(demande, 'annulee')"
-        class="btn-annuler"
-      >
-        Refuser
-      </button>
-      <button (click)="supprimerDemandeEvenement(demande.id)" class="btn-supprimer">
-        Supprimer
-      </button>
-    </div>
-  </div>
-
-  <p *ngIf="demandesEvenement.length === 0" class="Aucune">Aucune demande pour le moment.</p>
-</section>
-<section class="gestion-menu">
-  <h2>Gestion du menu</h2>
-
-  <form (ngSubmit)="validerPlat()" class="form-plat">
-    <input
-      type="text"
-      [(ngModel)]="nouveauPlat.nom"
-      name="nom"
-      placeholder="Nom du plat"
-    />
-    <input
-      type="number"
-      [(ngModel)]="nouveauPlat.prix"
-      name="prix"
-      placeholder="Prix (FCFA)"
-    />
-    <input
-      type="text"
-      [(ngModel)]="nouveauPlat.categorie"
-      name="categorie"
-      placeholder="Catégorie"
-    />
-    <textarea
-      [(ngModel)]="nouveauPlat.description"
-      name="description"
-      placeholder="Description"
-    ></textarea>
-
-    <div class="form-plat-boutons">
-      <button type="submit">
-        {{ platEnEditionId ? 'Enregistrer les modifications' : 'Ajouter le plat' }}
-      </button>
-      <button type="button" *ngIf="platEnEditionId" (click)="annulerModification()">
-        Annuler
-      </button>
-    </div>
-  </form>
-
-  <div *ngFor="let plat of plats" class="plat-card">
-    <div class="plat-header">
-      <span class="plat-nom">{{ plat.nom }}</span>
-      <span class="plat-prix">{{ plat.prix }} FCFA</span>
-    </div>
-    <p class="plat-categorie">{{ plat.categorie }}</p>
-    <p class="plat-description">{{ plat.description }}</p>
-
-    <div class="plat-boutons">
-      <button (click)="commencerModification(plat)">Modifier</button>
-      <button (click)="supprimerPlat(plat.id)" class="btn-supprimer">Supprimer</button>
-    </div>
-  </div>
-
-  <p *ngIf="plats.length === 0" class="Aucune">Aucun plat pour ce restaurant.</p>
-</section>
+    <p *ngIf="plats.length === 0" class="Aucune">{{ 'admin.menu.aucunPlat' | translate }}</p>
+  </section>
+</div>

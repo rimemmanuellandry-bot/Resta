@@ -1,9 +1,10 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
-import { supabase } from '../../supabase';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { EtapesCommandeService } from '../../services/etapes-commande';
+import { supabase } from '../../supabase';
 
 interface Commande {
   id: number;
@@ -52,7 +53,7 @@ export interface Plat {
 
 @Component({
   selector: 'app-admin',
-  imports: [FormsModule, CommonModule, RouterLink],
+  imports: [FormsModule, CommonModule, RouterLink, TranslatePipe],
   templateUrl: './admin.html',
   styleUrl: './admin.css'
 })
@@ -67,7 +68,12 @@ export class Admin implements OnInit {
   platEnEditionId: number | null = null;
   restaurantId: string | null = null;
 
-  constructor(private cdr: ChangeDetectorRef, private route: ActivatedRoute) {}
+  constructor(
+    private cdr: ChangeDetectorRef,
+    private route: ActivatedRoute,
+    private translate: TranslateService,
+    public etapesCommande: EtapesCommandeService
+  ) {}
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
@@ -78,23 +84,27 @@ export class Admin implements OnInit {
         return;
       }
 
-this.chargerCommandes();
-this.chargerPlats();
-this.chargerReservations();
- 
+      this.chargerCommandes();
+      this.chargerPlats();
+      this.chargerReservations();
+
     });
 
- setInterval(() => {
-  if (this.restaurantId) {
-    this.chargerCommandes();
-    this.chargerReservations();
-    this.chargerDemandesEvenement();
-  }
-}, 3000);
+    setInterval(() => {
+      if (this.restaurantId) {
+        this.chargerCommandes();
+        this.chargerReservations();
+        this.chargerDemandesEvenement();
+      }
+    }, 3000);
   }
 
   getEtapes(commande: Commande): string[] {
     return commande.mode === 'livraison' ? this.etapesLivraison : this.etapesSurPlace;
+  }
+  // Traduit le type de prestation stocké en base (valeur métier en français, ex: "Mariage")
+  libelleTypePrestation(type: string): string {
+    return this.translate.instant('evenement.types.' + type);
   }
 
   async chargerCommandes() {
@@ -129,49 +139,50 @@ this.chargerReservations();
 
     this.chargerCommandes();
   }
-async chargerReservations() {
-  const { data, error } = await supabase
-    .from('reservations')
-    .select('*')
-    .eq('restaurant_id', this.restaurantId)
-    .order('date_heure', { ascending: true });
 
-  if (error) {
-    console.error('Erreur lors du chargement des réservations :', error);
-    return;
+  async chargerReservations() {
+    const { data, error } = await supabase
+      .from('reservations')
+      .select('*')
+      .eq('restaurant_id', this.restaurantId)
+      .order('date_heure', { ascending: true });
+
+    if (error) {
+      console.error('Erreur lors du chargement des réservations :', error);
+      return;
+    }
+
+    this.reservations = data as Reservation[];
+    this.cdr.detectChanges();
   }
 
-  this.reservations = data as Reservation[];
-  this.cdr.detectChanges();
-}
+  async changerStatutReservation(reservation: Reservation, nouveauStatut: string) {
+    const { error } = await supabase
+      .from('reservations')
+      .update({ statut: nouveauStatut })
+      .eq('id', reservation.id);
 
-async changerStatutReservation(reservation: Reservation, nouveauStatut: string) {
-  const { error } = await supabase
-    .from('reservations')
-    .update({ statut: nouveauStatut })
-    .eq('id', reservation.id);
+    if (error) {
+      console.error('Erreur lors de la mise à jour de la réservation :', error);
+      return;
+    }
 
-  if (error) {
-    console.error('Erreur lors de la mise à jour de la réservation :', error);
-    return;
+    this.chargerReservations();
   }
 
-  this.chargerReservations();
-}
+  async supprimerReservation(id: number) {
+    const { error } = await supabase
+      .from('reservations')
+      .delete()
+      .eq('id', id);
 
-async supprimerReservation(id: number) {
-  const { error } = await supabase
-    .from('reservations')
-    .delete()
-    .eq('id', id);
+    if (error) {
+      console.error('Erreur lors de la suppression de la réservation :', error);
+      return;
+    }
 
-  if (error) {
-    console.error('Erreur lors de la suppression de la réservation :', error);
-    return;
+    this.chargerReservations();
   }
-
-  this.chargerReservations();
-}
 
   async chargerPlats() {
     const { data, error } = await supabase
@@ -206,12 +217,12 @@ async supprimerReservation(id: number) {
 
   async validerPlat() {
     if (!this.nouveauPlat.nom || !this.nouveauPlat.prix) {
-      alert('Le nom et le prix sont obligatoires.');
+      alert(this.translate.instant('admin.menu.erreurNomPrixRequis'));
       return;
     }
 
     if (!this.restaurantId) {
-      alert('Impossible d\'enregistrer : aucun restaurant sélectionné.');
+      alert(this.translate.instant('admin.menu.erreurRestaurantManquant'));
       return;
     }
 
@@ -262,47 +273,48 @@ async supprimerReservation(id: number) {
 
     this.chargerPlats();
   }
+
   async chargerDemandesEvenement() {
-  const { data, error } = await supabase
-    .from('demandes_evenement')
-    .select('*')
-    .eq('restaurant_id', this.restaurantId)
-    .order('date_evenement', { ascending: true });
+    const { data, error } = await supabase
+      .from('demandes_evenement')
+      .select('*')
+      .eq('restaurant_id', this.restaurantId)
+      .order('date_evenement', { ascending: true });
 
-  if (error) {
-    console.error('Erreur lors du chargement des demandes d\'événement :', error);
-    return;
+    if (error) {
+      console.error('Erreur lors du chargement des demandes d\'événement :', error);
+      return;
+    }
+
+    this.demandesEvenement = data as DemandeEvenement[];
+    this.cdr.detectChanges();
   }
 
-  this.demandesEvenement = data as DemandeEvenement[];
-  this.cdr.detectChanges();
-}
+  async changerStatutEvenement(demande: DemandeEvenement, nouveauStatut: string) {
+    const { error } = await supabase
+      .from('demandes_evenement')
+      .update({ statut: nouveauStatut })
+      .eq('id', demande.id);
 
-async changerStatutEvenement(demande: DemandeEvenement, nouveauStatut: string) {
-  const { error } = await supabase
-    .from('demandes_evenement')
-    .update({ statut: nouveauStatut })
-    .eq('id', demande.id);
+    if (error) {
+      console.error('Erreur lors de la mise à jour :', error);
+      return;
+    }
 
-  if (error) {
-    console.error('Erreur lors de la mise à jour :', error);
-    return;
+    this.chargerDemandesEvenement();
   }
 
-  this.chargerDemandesEvenement();
-}
+  async supprimerDemandeEvenement(id: number) {
+    const { error } = await supabase
+      .from('demandes_evenement')
+      .delete()
+      .eq('id', id);
 
-async supprimerDemandeEvenement(id: number) {
-  const { error } = await supabase
-    .from('demandes_evenement')
-    .delete()
-    .eq('id', id);
+    if (error) {
+      console.error('Erreur lors de la suppression :', error);
+      return;
+    }
 
-  if (error) {
-    console.error('Erreur lors de la suppression :', error);
-    return;
+    this.chargerDemandesEvenement();
   }
-
-  this.chargerDemandesEvenement();
-}
 }
