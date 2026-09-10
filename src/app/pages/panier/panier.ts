@@ -2,13 +2,14 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { PanierService } from '../../services/panier';
 import { supabase } from '../../supabase';
 import { Plat } from '../../services/panier';
 
 @Component({
   selector: 'app-panier',
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, RouterLink, FormsModule, TranslatePipe],
   templateUrl: './panier.html',
   styleUrl: './panier.css',
 })
@@ -18,13 +19,17 @@ export class Panier {
   erreurTelephonePaiement = '';
   erreur = '';
 
-  constructor(public panierService: PanierService, private router: Router) {}
+  constructor(
+    public panierService: PanierService,
+    private router: Router,
+    private translate: TranslateService
+  ) {}
 
   retirer(id: number) {
     this.panierService.retirerUn(id);
   }
 
-  ajouter(plat: Plat) {          // ← nouvelle méthode
+  ajouter(plat: Plat) {
     this.panierService.ajouter(plat);
   }
 
@@ -34,7 +39,7 @@ export class Panier {
       return true;
     }
     if (!this.panierService.adresse.trim()) {
-      this.erreurAdresse = "L'adresse est obligatoire pour une livraison.";
+      this.erreurAdresse = this.translate.instant('panier.erreurAdresseRequise');
       return false;
     }
     this.erreurAdresse = '';
@@ -47,11 +52,11 @@ export class Panier {
       return true;
     }
     if (!this.panierService.telephone.trim()) {
-      this.erreurTelephone = 'Le téléphone est obligatoire pour une livraison.';
+      this.erreurTelephone = this.translate.instant('panier.erreurTelephoneRequis');
       return false;
     }
     if (!/^6\d{8}$/.test(this.panierService.telephone.trim())) {
-      this.erreurTelephone = 'Numéro invalide (9 chiffres, doit commencer par 6).';
+      this.erreurTelephone = this.translate.instant('panier.erreurTelephoneInvalide');
       return false;
     }
     this.erreurTelephone = '';
@@ -59,16 +64,16 @@ export class Panier {
   }
 
   validerTelephonePaiement(): boolean {
-    if (!this.panierService.moyenPaiement) {
+    if (!this.panierService.moyenPaiement || this.panierService.moyenPaiement === 'en_main') {
       this.erreurTelephonePaiement = '';
       return true;
     }
     if (!this.panierService.telephonePaiement.trim()) {
-      this.erreurTelephonePaiement = 'Le numéro de paiement est obligatoire.';
+      this.erreurTelephonePaiement = this.translate.instant('panier.erreurTelephonePaiementRequis');
       return false;
     }
     if (!/^6\d{8}$/.test(this.panierService.telephonePaiement.trim())) {
-      this.erreurTelephonePaiement = 'Numéro invalide (9 chiffres, doit commencer par 6).';
+      this.erreurTelephonePaiement = this.translate.instant('panier.erreurTelephonePaiementInvalide');
       return false;
     }
     this.erreurTelephonePaiement = '';
@@ -83,7 +88,7 @@ export class Panier {
     const telephonePaiementValide = this.validerTelephonePaiement();
 
     if (!adresseValide || !telephoneValide || !telephonePaiementValide) {
-      this.erreur = 'Corrigez les champs signalés ci-dessus.';
+      this.erreur = this.translate.instant('panier.erreurChampsSignales');
       return;
     }
 
@@ -110,7 +115,7 @@ export class Panier {
 
     if (error) {
       console.error('Erreur lors de la commande :', error);
-      alert('Une erreur est survenue, réessayez.');
+      alert(this.translate.instant('panier.erreurCommande'));
       return;
     }
 
