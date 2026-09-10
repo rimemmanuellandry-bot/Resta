@@ -2,11 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { supabase } from '../../supabase';
+import { AuthErreursService } from '../../services/auth-erreurs';
 
 @Component({
   selector: 'app-connexion',
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, TranslatePipe],
   templateUrl: './connexion.html',
   styleUrl: './connexion.css',
 })
@@ -17,7 +19,11 @@ export class Connexion implements OnInit {
   chargement = false;
   afficherMotDePasse = false;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private translate: TranslateService,
+    private authErreurs: AuthErreursService
+  ) {}
 
   async ngOnInit() {
     const { data } = await supabase.auth.getSession();
@@ -41,7 +47,7 @@ export class Connexion implements OnInit {
     this.erreur = '';
 
     if (!this.email.trim() || !this.motDePasse) {
-      this.erreur = 'Email et mot de passe sont obligatoires.';
+      this.erreur = this.translate.instant('connexion.erreurChampsRequis');
       return;
     }
 
@@ -54,7 +60,7 @@ export class Connexion implements OnInit {
 
     if (error) {
       this.chargement = false;
-      this.erreur = 'Email ou mot de passe incorrect.';
+      this.erreur = this.authErreurs.traduire(error.message);
       return;
     }
 

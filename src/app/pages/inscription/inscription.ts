@@ -2,11 +2,13 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { supabase } from '../../supabase';
+import { AuthErreursService } from '../../services/auth-erreurs';
 
 @Component({
   selector: 'app-inscription',
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, TranslatePipe],
   templateUrl: './inscription.html',
   styleUrl: './inscription.css',
 })
@@ -18,16 +20,19 @@ export class Inscription {
   chargement = false;
   afficherMotDePasse = false;
 
-  // erreurs par champ, affichées sous chaque input
   erreurNom = '';
   erreurEmail = '';
   erreurMotDePasse = '';
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private translate: TranslateService,
+    private authErreurs: AuthErreursService
+  ) {}
 
   validerNom(): boolean {
     if (!this.nom.trim()) {
-      this.erreurNom = 'Le nom est obligatoire.';
+      this.erreurNom = this.translate.instant('inscription.erreurNomRequis');
       return false;
     }
     this.erreurNom = '';
@@ -36,12 +41,12 @@ export class Inscription {
 
   validerEmail(): boolean {
     if (!this.email.trim()) {
-      this.erreurEmail = "L'email est obligatoire.";
+      this.erreurEmail = this.translate.instant('inscription.erreurEmailRequis');
       return false;
     }
     const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!regexEmail.test(this.email)) {
-      this.erreurEmail = "Format d'email invalide.";
+      this.erreurEmail = this.translate.instant('inscription.erreurEmailInvalide');
       return false;
     }
     this.erreurEmail = '';
@@ -50,11 +55,11 @@ export class Inscription {
 
   validerMotDePasse(): boolean {
     if (!this.motDePasse) {
-      this.erreurMotDePasse = 'Le mot de passe est obligatoire.';
+      this.erreurMotDePasse = this.translate.instant('inscription.erreurMotDePasseRequis');
       return false;
     }
     if (this.motDePasse.length < 9) {
-      this.erreurMotDePasse = 'Le mot de passe doit contenir au moins 9 caractères.';
+      this.erreurMotDePasse = this.translate.instant('inscription.erreurMotDePasseCourt');
       return false;
     }
     const aMinuscule = /[a-z]/.test(this.motDePasse);
@@ -63,8 +68,7 @@ export class Inscription {
     const aSymbole = /[^A-Za-z0-9]/.test(this.motDePasse);
 
     if (!aMinuscule || !aMajuscule || !aChiffre || !aSymbole) {
-      this.erreurMotDePasse =
-        'Le mot de passe doit contenir une majuscule, une minuscule, un chiffre et un symbole (ex : ! @ # $ %).';
+      this.erreurMotDePasse = this.translate.instant('inscription.erreurMotDePasseComplexite');
       return false;
     }
 
@@ -80,7 +84,7 @@ export class Inscription {
     const motDePasseValide = this.validerMotDePasse();
 
     if (!nomValide || !emailValide || !motDePasseValide) {
-      this.erreur = 'Corrigez les champs signalés ci-dessus.';
+      this.erreur = this.translate.instant('inscription.erreurChampsSignales');
       return;
     }
 
@@ -97,7 +101,7 @@ export class Inscription {
     this.chargement = false;
 
     if (error) {
-      this.erreur = error.message;
+      this.erreur = this.authErreurs.traduire(error.message);
       return;
     }
 

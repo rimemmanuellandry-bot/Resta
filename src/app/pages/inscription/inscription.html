@@ -1,10 +1,10 @@
 <div class="inscription-container">
   <div class="inscription-card">
     <div class="logo-header">
-  <img src="icons/icon-192x192.png" alt="Resta" class="logo-icone" />
-</div>
-    <h2>Créer un compte</h2>
-    <p class="sous-titre">Rejoignez Resta pour commander dans vos restaurants préférés</p>
+      <img src="icons/icon-192x192.png" alt="Resta" class="logo-icone" />
+    </div>
+    <h2>{{ 'inscription.titre' | translate }}</h2>
+    <p class="sous-titre">{{ 'inscription.sousTitre' | translate }}</p>
 
     <form (ngSubmit)="sInscrire()">
       <div class="champ">
@@ -12,7 +12,7 @@
           type="text"
           [(ngModel)]="nom"
           name="nom"
-          placeholder="Nom complet"
+          [placeholder]="'inscription.nomPlaceholder' | translate"
           [class.invalide]="erreurNom"
           (blur)="validerNom()"
         />
@@ -24,7 +24,7 @@
           type="email"
           [(ngModel)]="email"
           name="email"
-          placeholder="Adresse email"
+          [placeholder]="'inscription.emailPlaceholder' | translate"
           [class.invalide]="erreurEmail"
           (blur)="validerEmail()"
         />
@@ -32,35 +32,35 @@
       </div>
 
       <div class="champ">
-  <div class="champ-mot-de-passe-wrapper">
-    <input
-      [type]="afficherMotDePasse ? 'text' : 'password'"
-      [(ngModel)]="motDePasse"
-      name="motDePasse"
-      placeholder="Mot de passe (9 caractères min., avec majuscule, chiffre, symbole)"
-      [class.invalide]="erreurMotDePasse"
-      (blur)="validerMotDePasse()"
-    />
-    <button
-      type="button"
-      class="btn-oeil"
-      (click)="afficherMotDePasse = !afficherMotDePasse"
-      aria-label="Afficher/masquer le mot de passe"
-    >
-      {{ afficherMotDePasse ? '🙈' : '👁️' }}
-    </button>
-  </div>
-  <p *ngIf="erreurMotDePasse" class="erreur-champ">{{ erreurMotDePasse }}</p>
-</div>
+        <div class="champ-mot-de-passe-wrapper">
+          <input
+            [type]="afficherMotDePasse ? 'text' : 'password'"
+            [(ngModel)]="motDePasse"
+            name="motDePasse"
+            [placeholder]="'inscription.motDePassePlaceholder' | translate"
+            [class.invalide]="erreurMotDePasse"
+            (blur)="validerMotDePasse()"
+          />
+          <button
+            type="button"
+            class="btn-oeil"
+            (click)="afficherMotDePasse = !afficherMotDePasse"
+            [attr.aria-label]="'inscription.afficherMasquerAria' | translate"
+          >
+            {{ afficherMotDePasse ? '🙈' : '👁️' }}
+          </button>
+        </div>
+        <p *ngIf="erreurMotDePasse" class="erreur-champ">{{ erreurMotDePasse }}</p>
+      </div>
 
       <p *ngIf="erreur" class="erreur">{{ erreur }}</p>
 
       <button type="submit" [disabled]="chargement">
-        {{ chargement ? 'Création en cours...' : 'S\'inscrire' }}
+        {{ chargement ? ('inscription.creationEnCours' | translate) : ('inscription.sInscrire' | translate) }}
       </button>
     </form>
     <p class="lien-secondaire">
-  Déjà un compte ? <a routerLink="/connexion">Se connecter</a>
-</p>
+      {{ 'inscription.dejaCompte' | translate }} <a routerLink="/connexion">{{ 'inscription.seConnecter' | translate }}</a>
+    </p>
   </div>
 </div>
