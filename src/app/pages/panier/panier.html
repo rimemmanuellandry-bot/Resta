@@ -64,3 +64,31 @@
     <button
       [class.active]="panierService.moyenPaiement === 'mtn_momo'"
       (click)="panierService.moyenPaiement = 'mtn_momo'"
+    >
+      {{ 'panier.mtnMomo' | translate }}
+    </button>
+    <button
+      [class.active]="panierService.moyenPaiement === 'en_main'"
+      (click)="panierService.moyenPaiement = 'en_main'; panierService.telephonePaiement = ''"
+    >
+      {{ 'panier.enMain' | translate }}
+    </button>
+
+    <div class="champ" *ngIf="panierService.moyenPaiement === 'orange_money' || panierService.moyenPaiement === 'mtn_momo'">
+      <input
+        type="tel"
+        [placeholder]="'panier.telephonePaiementPlaceholder' | translate"
+        [(ngModel)]="panierService.telephonePaiement"
+        [class.invalide]="erreurTelephonePaiement"
+        (blur)="validerTelephonePaiement()"
+      />
+      <p *ngIf="erreurTelephonePaiement" class="erreur-champ">{{ erreurTelephonePaiement }}</p>
+    </div>
+  </div>
+
+  <div *ngIf="panierService.panier.length > 0" class="panier-total">
+    <p *ngIf="erreur" class="erreur">{{ erreur }}</p>
+    <p><strong>{{ 'panier.total' | translate: { montant: panierService.getTotal() } }}</strong></p>
+    <button (click)="commander()" [disabled]="!panierService.moyenPaiement">{{ 'panier.commander' | translate }}</button>
+  </div>
+</div>
