@@ -1,13 +1,9 @@
-<div class="localite-container">
-  <h2>{{ 'localite.titre' | translate }}</h2>
-  <p>{{ 'localite.sousTitre' | translate }}</p>
+<div class="scan-container">
+  <h2>{{ 'scan.titre' | translate }}</h2>
 
-  <p *ngIf="!chargementTermine" class="chargement">{{ 'localite.chargement' | translate }}</p>
+  <zxing-scanner
+  (scanSuccess)="onScanSuccess($event)"
+  ></zxing-scanner>
 
-  <div class="localite-liste" *ngIf="chargementTermine">
-    <button *ngFor="let localite of localites" (click)="choisirLocalite(localite)">
-      {{ localite }}
-    </button>
-    <p *ngIf="localites.length === 0" class="vide">{{ 'localite.aucuneLocalite' | translate }}</p>
-  </div>
+  <p>{{ ' scan.instuction' | translate }}</p>
 </div>
