@@ -43,3 +43,24 @@
       <p *ngIf="erreurTelephone" class="erreur-champ">{{ erreurTelephone }}</p>
     </div>
   </div>
+
+  <div *ngIf="panierService.panier.length > 0" class="allergies-form">
+    <h3>{{ 'panier.allergiesTitre' | translate }}</h3>
+    <textarea
+      [placeholder]="'panier.allergiesPlaceholder' | translate"
+      [(ngModel)]="panierService.allergies"
+      rows="2"
+    ></textarea>
+  </div>
+
+  <div *ngIf="panierService.panier.length > 0" class="paiement-choix">
+    <h3>{{ 'panier.paiementTitre' | translate }}</h3>
+    <button
+      [class.active]="panierService.moyenPaiement === 'orange_money'"
+      (click)="panierService.moyenPaiement = 'orange_money'"
+    >
+      {{ 'panier.orangeMoney' | translate }}
+    </button>
+    <button
+      [class.active]="panierService.moyenPaiement === 'mtn_momo'"
+      (click)="panierService.moyenPaiement = 'mtn_momo'"
