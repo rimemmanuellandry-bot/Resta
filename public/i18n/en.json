@@ -232,5 +232,10 @@
       "Repas d'entreprise": "Corporate meal",
       "Autre": "Other"
     }
+  },
+  "restaurant": {
+    "titre": "Restaurants in {{localite}}",
+    "chargement": "Loading...",
+    "aucunResultat": "No restaurant available in this area."
   }
 }

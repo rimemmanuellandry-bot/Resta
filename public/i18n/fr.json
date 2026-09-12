@@ -46,7 +46,7 @@
     "erreurTelephonePaiementInvalide": "Numéro invalide (9 chiffres, doit commencer par 6).",
     "erreurChampsSignales": "Corrigez les champs signalés ci-dessus.",
     "erreurCommande": "Une erreur est survenue, réessayez.",
-    "enMain": "Paiement en main"
+    "enMain": "Paiement en main" 
   },
   "inscription": {
     "titre": "Créer un compte",
@@ -249,5 +249,10 @@
       "Repas d'entreprise": "Repas d'entreprise",
       "Autre": "Autre"
     }
+  },
+  "restaurant": {
+    "titre": "Restaurants à {{localite}}",
+    "chargement": "Chargement...",
+    "aucunResultat": "Aucun restaurant disponible dans cette localité."
   }
 }
