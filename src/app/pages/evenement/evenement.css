@@ -1,14 +1,164 @@
-.champ select {
-  padding: 13px 15px;
+.inscription-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+.inscription-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 40px 32px;
+  max-width: 480px;
+  width: 100%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.inscription-card h2 {
+  text-align: center;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #1a3c2e;
+  margin: 0 0 8px;
+}
+
+.sous-titre {
+  text-align: center;
+  color: #6b6b6b;
+  font-size: 0.9rem;
+  margin: 0 0 28px;
+  line-height: 1.4;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.champ {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.champ label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1a3c2e;
+  margin-bottom: 2px;
+}
+
+.ligne-double {
+  display: flex;
+  gap: 12px;
+}
+
+.ligne-double .champ {
+  flex: 1;
+  min-width: 0;
+}
+
+input,
+select,
+textarea {
+  padding: 12px 14px;
   border: 1.5px solid #ddd;
   border-radius: 10px;
   font-size: 0.95rem;
   font-family: inherit;
-  background: #fff;
+  transition: border-color 0.15s ease;
+  width: 100%;
   box-sizing: border-box;
+  background: #fff;
 }
 
-.champ select:focus {
+input:focus,
+select:focus,
+textarea:focus {
   outline: none;
   border-color: #1a3c2e;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #999;
+}
+
+textarea {
+  resize: vertical;
+  font-family: inherit;
+}
+
+input.invalide {
+  border-color: #c0392b;
+}
+
+.erreur-champ {
+  color: #c0392b;
+  font-size: 0.78rem;
+  margin: 0;
+  padding-left: 2px;
+}
+
+.erreur {
+  color: #c0392b;
+  background: #fdecea;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 0.85rem;
+  margin: 0;
+  text-align: center;
+}
+
+.confirmation {
+  text-align: center;
+}
+
+.confirmation p {
+  margin: 0 0 10px;
+  color: #1a3c2e;
+}
+
+.confirmation a {
+  display: inline-block;
+  margin-top: 8px;
+  color: #1a3c2e;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+button[type="submit"] {
+  margin-top: 8px;
+  padding: 13px;
+  background: #1a3c2e;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, opacity 0.15s ease;
+}
+
+button[type="submit"]:hover:not(:disabled) {
+  background: #2a5643;
+}
+
+button[type="submit"]:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+  .inscription-card {
+    padding: 32px 24px;
+  }
+
+  .ligne-double {
+    flex-direction: column;
+    gap: 14px;
+  }
 }
