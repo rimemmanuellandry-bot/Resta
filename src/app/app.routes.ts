@@ -27,6 +27,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/reservation/reservation').then(m => m.Reservation),
   },
   {
+    path: 'evenement',
+    loadComponent: () => import('./pages/evenement/evenement').then(m => m.Evenement),
+  },
+  {
     path: 'scan',
     loadComponent: () => import('./pages/scan-qr/scan-qr').then(m => m.ScanQr),
   },
