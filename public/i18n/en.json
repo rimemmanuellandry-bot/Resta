@@ -121,7 +121,8 @@
     "supprimer": "Delete",
     "aucuneCommande": "You have no orders yet.",
     "nouvelleCommande": "New order",
-    "dateFormat": "MM/dd/yyyy 'at' HH:mm"
+    "dateFormat": "MM/dd/yyyy 'at' HH:mm",
+    "telechargerFacture": "Download invoice"
   },
   "admin": {
     "voirChiffreAffaires": "View revenue",
@@ -237,5 +238,20 @@
     "titre": "Restaurants in {{localite}}",
     "chargement": "Loading...",
     "aucunResultat": "No restaurant available in this area."
+  },
+  "facture": {
+    "titreDocument": "Resta - Invoice",
+    "commandeNumero": "Order #",
+    "dateLabel": "Date:",
+    "modeLabel": "Mode:",
+    "modeLivraison": "Delivery",
+    "modeSurPlace": "Dine-in",
+    "adresseLabel": "Address:",
+    "telephoneLabel": "Phone:",
+    "tableLabel": "Table #",
+    "detailTitre": "Order details",
+    "totalLabel": "Total:",
+    "allergiesLabel": "Reported allergies:",
+    "merci": "Thank you for your order!"
   }
 }

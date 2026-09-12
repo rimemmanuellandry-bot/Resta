@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { EtapesCommandeService } from '../../services/etapes-commande';
+import { FactureService } from '../../services/facture';
 import { supabase } from '../../supabase';
 
 @Component({
@@ -17,7 +18,11 @@ export class MesCommandes implements OnInit {
   etapesSurPlace = ['reçue', 'en préparation', 'prête', 'servie'];
   etapesLivraison = ['reçue', 'en préparation', 'prête', 'en route', 'livrée'];
 
-  constructor(private cdr: ChangeDetectorRef, public etapesCommande: EtapesCommandeService) {}
+  constructor(
+    private cdr: ChangeDetectorRef,
+    public etapesCommande: EtapesCommandeService,
+    private factureService: FactureService
+  ) {}
 
   ngOnInit() {
     this.chargerCommandes();
@@ -29,6 +34,10 @@ export class MesCommandes implements OnInit {
 
   getEtapes(commande: any): string[] {
     return commande.mode === 'livraison' ? this.etapesLivraison : this.etapesSurPlace;
+  }
+
+  telechargerFacture(commande: any) {
+    this.factureService.telecharger(commande);
   }
 
   async chargerCommandes() {
@@ -67,7 +76,7 @@ export class MesCommandes implements OnInit {
     }
     const creee = new Date(commande.created_at).getTime();
     const maintenant = Date.now();
-    return maintenant - creee < 60000; // moins d'1 minute
+    return maintenant - creee < 60000;
   }
 
   async annuler(commande: any) {

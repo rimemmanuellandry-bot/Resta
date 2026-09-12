@@ -42,6 +42,13 @@
       >
         {{ 'mesCommandes.annuler' | translate }}
       </button>
+      <button
+        *ngIf="commande.statut === 'servie' || commande.statut === 'livrée'"
+        (click)="telechargerFacture(commande)"
+        class="btn-facture"
+      >
+        {{ 'mesCommandes.telechargerFacture' | translate }}
+      </button>
       <button (click)="supprimer(commande)" class="btn-supprimer">
         {{ 'mesCommandes.supprimer' | translate }}
       </button>

@@ -137,7 +137,8 @@
     "supprimer": "Supprimer",
     "aucuneCommande": "Vous n'avez aucune commande pour le moment.",
     "nouvelleCommande": "Nouvelle commande",
-    "dateFormat": "dd/MM/yyyy 'à' HH:mm"
+    "dateFormat": "dd/MM/yyyy 'à' HH:mm",
+    "telechargerFacture": "Télécharger la facture"
   },
   "admin": {
     "voirChiffreAffaires": "Voir le chiffre d'affaires",
@@ -254,5 +255,20 @@
     "titre": "Restaurants à {{localite}}",
     "chargement": "Chargement...",
     "aucunResultat": "Aucun restaurant disponible dans cette localité."
+  },
+  "facture": {
+    "titreDocument": "Resta - Facture",
+    "commandeNumero": "Commande n°",
+    "dateLabel": "Date :",
+    "modeLabel": "Mode :",
+    "modeLivraison": "Livraison",
+    "modeSurPlace": "Sur place",
+    "adresseLabel": "Adresse :",
+    "telephoneLabel": "Téléphone :",
+    "tableLabel": "Table n°",
+    "detailTitre": "Détail de la commande",
+    "totalLabel": "Total :",
+    "allergiesLabel": "Allergies signalées :",
+    "merci": "Merci pour votre commande !"
   }
 }
