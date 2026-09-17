@@ -270,5 +270,13 @@
     "totalLabel": "Total :",
     "allergiesLabel": "Allergies signalées :",
     "merci": "Merci pour votre commande !"
+  },
+  "notifications": {
+    "titre": "Notifications",
+    "aucune": "Aucune nouvelle notification.",
+    "reservationConfirmee": "Votre réservation du {{date}} a été confirmée.",
+    "reservationRefusee": "Votre réservation du {{date}} a été refusée.",
+    "evenementConfirme": "Votre demande de privatisation du {{date}} a été confirmée.",
+    "evenementRefuse": "Votre demande de privatisation du {{date}} a été refusée."
   }
 }

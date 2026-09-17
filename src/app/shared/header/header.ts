@@ -4,6 +4,7 @@ import { Router, RouterLink, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { supabase } from '../../supabase';
 import { TranslateService, TranslatePipe } from '@ngx-translate/core';
+import { NotificationsService, NotificationItem } from '../../services/notification';
 
 @Component({
   selector: 'app-header',
@@ -19,6 +20,11 @@ export class Header implements OnInit {
   menuOuvert = false;
   langueActuelle = 'fr';
 
+  userId: string | null = null;
+  notificationsNonLues: NotificationItem[] = [];
+  notificationsLues: NotificationItem[] = [];
+  notificationsOuvertes = false;
+
   private pagesSansRetour = ['/', '/bienvenue'];
   private navigationsInternes = 0;
   private premiereNavigation = true;
@@ -26,7 +32,8 @@ export class Header implements OnInit {
   constructor(
     private router: Router,
     private location: Location,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private notificationsService: NotificationsService
   ) {}
 
   ngOnInit() {
@@ -42,6 +49,7 @@ export class Header implements OnInit {
         }
         this.majAffichageRetour(e.urlAfterRedirects);
         this.menuOuvert = false;
+        this.notificationsOuvertes = false;
       });
 
     this.verifierSession();
@@ -53,21 +61,79 @@ export class Header implements OnInit {
         this.estConnecte = false;
         this.estAdmin = false;
         this.restaurantId = null;
+        this.userId = null;
+        this.notificationsNonLues = [];
+        this.notificationsLues = [];
       }
     });
+
+    setInterval(() => {
+      if (this.estConnecte && !this.estAdmin && this.userId) {
+        this.chargerNotifications();
+      }
+    }, 8000);
   }
 
   toggleMenu() {
     this.menuOuvert = !this.menuOuvert;
+    this.notificationsOuvertes = false;
   }
 
   fermerMenu() {
     this.menuOuvert = false;
   }
 
+  toggleNotifications() {
+    this.notificationsOuvertes = !this.notificationsOuvertes;
+    this.menuOuvert = false;
+  }
+
+  fermerNotifications() {
+    this.notificationsOuvertes = false;
+  }
+
+  libelleNotification(item: NotificationItem): string {
+    const langue = this.translate.currentLang() || 'fr';
+    const localeDate = langue === 'en' ? 'en-US' : 'fr-FR';
+    const dateFormatee = new Date(item.date).toLocaleDateString(localeDate);
+
+    if (item.type === 'reservation') {
+      return item.statut === 'confirmee'
+        ? this.translate.instant('notifications.reservationConfirmee', { date: dateFormatee })
+        : this.translate.instant('notifications.reservationRefusee', { date: dateFormatee });
+    }
+
+    return item.statut === 'confirmee'
+      ? this.translate.instant('notifications.evenementConfirme', { date: dateFormatee })
+      : this.translate.instant('notifications.evenementRefuse', { date: dateFormatee });
+  }
+
+  async marquerVue(item: NotificationItem) {
+    await this.notificationsService.marquerVue(item);
+    this.notificationsNonLues = this.notificationsNonLues.filter(n => !(n.id === item.id && n.type === item.type));
+    item.vue = true;
+    this.notificationsLues.unshift(item);
+    this.notificationsLues = this.notificationsLues.slice(0, 15);
+  }
+  async supprimer(notif: NotificationItem, event: Event) {
+  event.stopPropagation();
+  await this.notificationsService.supprimer(notif);
+  this.notificationsNonLues = this.notificationsNonLues.filter(n => n.id !== notif.id);
+  this.notificationsLues = this.notificationsLues.filter(n => n.id !== notif.id);
+}
+
   changerLangue(langue: string) {
     this.langueActuelle = langue;
     this.translate.use(langue);
+  }
+
+  private async chargerNotifications() {
+    if (!this.userId) {
+      return;
+    }
+    const { nonLues, lues } = await this.notificationsService.charger(this.userId);
+    this.notificationsNonLues = nonLues;
+    this.notificationsLues = lues;
   }
 
   private async verifierSession() {
@@ -76,10 +142,12 @@ export class Header implements OnInit {
     if (!session) {
       this.estConnecte = false;
       this.estAdmin = false;
+      this.userId = null;
       return;
     }
 
     this.estConnecte = true;
+    this.userId = session.user.id;
 
     const { data: admin } = await supabase
       .from('admins')
@@ -93,6 +161,7 @@ export class Header implements OnInit {
     } else {
       this.estAdmin = false;
       this.restaurantId = null;
+      this.chargerNotifications();
     }
   }
 
@@ -121,6 +190,8 @@ export class Header implements OnInit {
     await supabase.auth.signOut();
     this.estConnecte = false;
     this.estAdmin = false;
+    this.notificationsNonLues = [];
+    this.notificationsLues = [];
     this.menuOuvert = false;
     this.router.navigate(['/']);
   }

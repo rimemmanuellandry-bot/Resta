@@ -11,10 +11,40 @@
 
   <a *ngIf="!estConnecte" routerLink="/connexion" class="lien-connexion">{{ 'header.seConnecter' | translate }}</a>
 
-  <button *ngIf="estConnecte" (click)="toggleMenu()" class="btn-menu" aria-label="Menu">
-    ☰
-  </button>
+  <div class="header-droite" *ngIf="estConnecte">
+    <button *ngIf="!estAdmin" (click)="toggleNotifications()" class="btn-notif" aria-label="Notifications">
+      🔔
+      <span class="badge-notif" *ngIf="notificationsNonLues.length > 0">{{ notificationsNonLues.length }}</span>
+    </button>
+
+    <button (click)="toggleMenu()" class="btn-menu" aria-label="Menu">
+      ☰
+    </button>
+  </div>
 </header>
+
+<div class="notif-overlay" *ngIf="notificationsOuvertes" (click)="fermerNotifications()"></div>
+
+<div class="notif-panel" *ngIf="notificationsOuvertes">
+  <div class="notif-header">
+    <span>{{ 'notifications.titre' | translate }}</span>
+  </div>
+
+  <div class="notif-liste" *ngIf="notificationsNonLues.length > 0 || notificationsLues.length > 0; else notifVide">
+   <div class="notif-item" *ngFor="let notif of notificationsNonLues" (click)="marquerVue(notif)">
+  <span class="notif-texte">{{ libelleNotification(notif) }}</span>
+  <button class="notif-supprimer" (click)="supprimer(notif, $event)">✕</button>
+</div>
+<div class="notif-item notif-item-lue" *ngFor="let notif of notificationsLues">
+  <span class="notif-texte">{{ libelleNotification(notif) }}</span>
+  <button class="notif-supprimer" (click)="supprimer(notif, $event)">✕</button>
+</div>
+  </div>
+
+  <ng-template #notifVide>
+    <p class="notif-vide">{{ 'notifications.aucune' | translate }}</p>
+  </ng-template>
+</div>
 
 <div class="menu-overlay" *ngIf="menuOuvert" (click)="fermerMenu()"></div>
 

@@ -4,7 +4,7 @@
 }
 
 body {
-  background-image: linear-gradient(rgba(10, 8, 5, 0.55), rgba(10, 8, 5, 0.55)), url('/images/fond genrale.jpg');
+  background-image: linear-gradient(rgba(10, 8, 5, 0.55), rgba(10, 8, 5, 0.55)), url('/images/fond generale.jpg');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;

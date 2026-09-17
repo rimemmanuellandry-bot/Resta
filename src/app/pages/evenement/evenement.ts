@@ -94,6 +94,8 @@ export class Evenement implements OnInit {
 
     this.chargement = true;
 
+    const { data: userData } = await supabase.auth.getUser();
+
     const { error } = await supabase.from('demandes_evenement').insert({
       restaurant_id: this.restaurantId,
       type_prestation: this.typePrestation,
@@ -105,6 +107,7 @@ export class Evenement implements OnInit {
       telephone: this.telephone,
       description: this.description || null,
       statut: 'en_attente',
+      user_id: userData.user?.id || null,
     });
 
     this.chargement = false;
@@ -115,6 +118,6 @@ export class Evenement implements OnInit {
       return;
     }
 
-    this.demandeEnvoyee = true;
+ this.demandeEnvoyee = true;
   }
 }

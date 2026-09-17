@@ -253,5 +253,13 @@
     "totalLabel": "Total:",
     "allergiesLabel": "Reported allergies:",
     "merci": "Thank you for your order!"
+  },
+  "notifications": {
+    "titre": "Notifications",
+    "aucune": "No new notifications.",
+    "reservationConfirmee": "Your reservation on {{date}} has been confirmed.",
+    "reservationRefusee": "Your reservation on {{date}} has been declined.",
+    "evenementConfirme": "Your private event request on {{date}} has been confirmed.",
+    "evenementRefuse": "Your private event request on {{date}} has been declined."
   }
 }

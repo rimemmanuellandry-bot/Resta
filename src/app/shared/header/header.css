@@ -7,7 +7,7 @@
   backdrop-filter: blur(6px);
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 1000;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
 }
 
@@ -254,4 +254,134 @@
 .menu-item.lien-deconnexion {
   color: #c0392b;
   padding: 16px 22px;
+}
+.header-droite {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+/* Overlay semi-transparent derrière le panneau */
+.notif-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.25);
+  z-index: 999;
+}
+
+/* Panneau de notifications */
+.notif-panel {
+  position: absolute;
+  top: 56px;
+  right: 16px;
+  width: 320px;
+  max-height: 420px;
+  overflow-y: auto;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  z-index: 1001;
+  animation: notif-apparition 0.15s ease-out;
+}
+
+@keyframes notif-apparition {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.notif-panel h3 {
+  margin: 0;
+  padding: 14px 16px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1a3c2e;
+  border-bottom: 1px solid #f0e6c8;
+}
+
+/* Chaque notification */
+.notif-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f4f4f4;
+  font-size: 0.85rem;
+  color: #2a2a2a;
+  line-height: 1.4;
+  transition: background 0.15s ease;
+}
+
+.notif-item:hover {
+  background: #faf8f0;
+}
+
+.notif-item:last-child {
+  border-bottom: none;
+}
+
+/* Notification non lue : accent doré */
+.notif-item:not(.notif-item-lue) {
+  border-left: 3px solid #d4af37;
+  background: #fffdf5;
+}
+
+/* Notification déjà lue : grisée */
+.notif-item-lue {
+  color: #999;
+  border-left: 3px solid transparent;
+}
+
+/* Bouton suppression (croix) */
+.notif-supprimer {
+  background: none;
+  border: none;
+  color: #bbb;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.notif-supprimer:hover {
+  color: #c0392b;
+  background: #fdecea;
+}
+
+/* État vide */
+.notif-panel .notif-vide {
+  padding: 24px 16px;
+  text-align: center;
+  color: #999;
+  font-size: 0.85rem;
+}
+
+/* Bouton cloche + badge */
+.btn-notif {
+  position: relative;
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.badge-notif {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: #d4af37;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 2px;
 }
