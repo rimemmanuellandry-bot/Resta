@@ -44,10 +44,25 @@ export class Statistiques implements OnInit {
   ) {}
 
   async ngOnInit() {
-    this.restaurantId = this.route.snapshot.queryParams['restaurant_id'] || null;
+    const { data: { session } } = await supabase.auth.getSession();
+    let adminRestaurantId: string | null = null;
+
+    if (session) {
+      const { data: adminRecord } = await supabase
+        .from('admins')
+        .select('restaurant_id')
+        .eq('user_id', session.user.id)
+        .maybeSingle();
+      if (adminRecord) {
+        adminRestaurantId = adminRecord.restaurant_id;
+      }
+    }
+
+    const paramId = this.route.snapshot.queryParams['restaurant_id'] || null;
+    this.restaurantId = adminRestaurantId || paramId;
 
     if (!this.restaurantId) {
-      console.error('Aucun restaurant_id fourni.');
+      console.error('Aucun restaurant_id fourni ou trouvé pour cet administrateur.');
       this.chargementTermine = true;
       this.cdr.detectChanges();
       return;

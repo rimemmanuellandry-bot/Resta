@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -12,11 +12,12 @@ import { supabase } from '../../supabase';
   templateUrl: './mes-commandes.html',
   styleUrl: './mes-commandes.css',
 })
-export class MesCommandes implements OnInit {
+export class MesCommandes implements OnInit, OnDestroy {
   commandes: any[] = [];
   chargement = true;
   etapesSurPlace = ['reçue', 'en préparation', 'prête', 'servie'];
   etapesLivraison = ['reçue', 'en préparation', 'prête', 'en route', 'livrée'];
+  private intervalId: any = null;
 
   constructor(
     private cdr: ChangeDetectorRef,
@@ -27,9 +28,16 @@ export class MesCommandes implements OnInit {
   ngOnInit() {
     this.chargerCommandes();
 
-    setInterval(() => {
+    this.intervalId = setInterval(() => {
       this.chargerCommandes();
     }, 5000);
+  }
+
+  ngOnDestroy() {
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+      this.intervalId = null;
+    }
   }
 
   getEtapes(commande: any): string[] {

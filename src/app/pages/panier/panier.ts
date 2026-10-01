@@ -120,7 +120,14 @@ export class Panier {
     }
 
     this.panierService.commandeId = data.id;
+    if (typeof sessionStorage !== 'undefined') {
+      try {
+        sessionStorage.setItem('resta_derniere_commande_id', String(data.id));
+      } catch (e) {
+        console.warn('Impossible de sauvegarder dans sessionStorage', e);
+      }
+    }
     this.panierService.vider();
-    this.router.navigate(['/commande-status']);
+    this.router.navigate(['/commande-status'], { queryParams: { id: data.id } });
   }
 }

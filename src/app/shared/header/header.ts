@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { Router, RouterLink, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
@@ -12,13 +12,14 @@ import { NotificationsService, NotificationItem } from '../../services/notificat
   templateUrl: './header.html',
   styleUrl: './header.css',
 })
-export class Header implements OnInit {
+export class Header implements OnInit, OnDestroy {
   estConnecte = false;
   estAdmin = false;
   restaurantId: string | null = null;
   afficherRetour = false;
   menuOuvert = false;
   langueActuelle = 'fr';
+  private intervalId: any = null;
 
   userId: string | null = null;
   notificationsNonLues: NotificationItem[] = [];
@@ -67,11 +68,18 @@ export class Header implements OnInit {
       }
     });
 
-    setInterval(() => {
+    this.intervalId = setInterval(() => {
       if (this.estConnecte && !this.estAdmin && this.userId) {
         this.chargerNotifications();
       }
     }, 8000);
+  }
+
+  ngOnDestroy() {
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+      this.intervalId = null;
+    }
   }
 
   toggleMenu() {

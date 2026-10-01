@@ -26,16 +26,14 @@ export class Menu implements OnInit {
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
-  async ngOnInit() {
-    let restaurantId: string | null = null;
-
+  ngOnInit() {
     this.route.queryParams.subscribe(params => {
       this.table = params['table'] || null;
       if (this.table) {
         this.panierService.setTable(this.table);
       }
 
-      restaurantId = params['restaurant_id'] || null;
+      const restaurantId = params['restaurant_id'] || null;
       if (restaurantId) {
         this.panierService.restaurantId = restaurantId;
       }
@@ -45,12 +43,14 @@ export class Menu implements OnInit {
       } else {
         this.panierService.mode = 'sur_place';
       }
+
+      if (isPlatformBrowser(this.platformId)) {
+        this.chargerPlats(restaurantId);
+      }
     });
+  }
 
-    if (!isPlatformBrowser(this.platformId)) {
-      return;
-    }
-
+  async chargerPlats(restaurantId: string | null) {
     let requete = supabase.from('plats').select('*').eq('supprime', false);
 
     if (restaurantId) {

@@ -1,9 +1,10 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
-import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { TranslatePipe } from '@ngx-translate/core';
 import { PanierService } from '../../services/panier';
 import { EtapesCommandeService } from '../../services/etapes-commande';
+import { FactureService } from '../../services/facture';
 import { supabase } from '../../supabase';
 
 @Component({
@@ -12,17 +13,19 @@ import { supabase } from '../../supabase';
   templateUrl: './commande-status.html',
   styleUrl: './commande-status.css',
 })
-export class CommandeStatus implements OnInit {
+export class CommandeStatus implements OnInit, OnDestroy {
   etapesSurPlace = ['reçue', 'en préparation', 'prête', 'servie'];
   etapesLivraison = ['reçue', 'en préparation', 'prête', 'en route', 'livrée'];
   statutActuel: string = 'reçue';
   commande: any = null;
+  private intervalId: any = null;
 
   constructor(
     public panierService: PanierService,
     private cdr: ChangeDetectorRef,
     public etapesCommande: EtapesCommandeService,
-    private translate: TranslateService
+    private factureService: FactureService,
+    private route: ActivatedRoute
   ) {}
 
   get etapes(): string[] {
@@ -30,11 +33,30 @@ export class CommandeStatus implements OnInit {
   }
 
   ngOnInit() {
-    this.chargerStatut();
+    this.route.queryParams.subscribe(params => {
+      const paramId = params['id'] ? Number(params['id']) : null;
+      if (paramId) {
+        this.panierService.commandeId = paramId;
+      } else if (!this.panierService.commandeId && typeof sessionStorage !== 'undefined') {
+        const stored = sessionStorage.getItem('resta_derniere_commande_id');
+        if (stored) {
+          this.panierService.commandeId = Number(stored);
+        }
+      }
 
-    setInterval(() => {
+      this.chargerStatut();
+    });
+
+    this.intervalId = setInterval(() => {
       this.chargerStatut();
     }, 3000);
+  }
+
+  ngOnDestroy() {
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+      this.intervalId = null;
+    }
   }
 
   async chargerStatut() {
@@ -63,69 +85,9 @@ export class CommandeStatus implements OnInit {
     return this.etapes.indexOf(this.statutActuel);
   }
 
-  async telechargerFacture() {
-    if (!this.commande) {
-      return;
+  telechargerFacture() {
+    if (this.commande) {
+      this.factureService.telecharger(this.commande);
     }
-
-    const { default: jsPDF } = await import('jspdf');
-
-    const doc = new jsPDF();
-    let y = 20;
-
-    // Format de date selon la langue active : fr-FR ou en-US
-   const langue = this.translate.currentLang() || 'fr';
-const localeDate = langue === 'en' ? 'en-US' : 'fr-FR';
-
-    doc.setFontSize(18);
-    doc.text(this.translate.instant('facture.titreDocument'), 20, y);
-    y += 12;
-
-    doc.setFontSize(11);
-    doc.text(`${this.translate.instant('facture.commandeNumero')} ${this.commande.id}`, 20, y);
-    y += 7;
-    doc.text(`${this.translate.instant('facture.dateLabel')} ${new Date(this.commande.created_at).toLocaleString(localeDate)}`, 20, y);
-    y += 7;
-    doc.text(`${this.translate.instant('facture.modeLabel')} ${this.commande.mode === 'livraison' ? this.translate.instant('facture.modeLivraison') : this.translate.instant('facture.modeSurPlace')}`, 20, y);
-    y += 7;
-
-    if (this.commande.mode === 'livraison') {
-      doc.text(`${this.translate.instant('facture.adresseLabel')} ${this.commande.adresse}`, 20, y);
-      y += 7;
-      doc.text(`${this.translate.instant('facture.telephoneLabel')} ${this.commande.telephone}`, 20, y);
-      y += 7;
-    } else {
-      doc.text(`${this.translate.instant('facture.tableLabel')} ${this.commande.table_numero}`, 20, y);
-      y += 7;
-    }
-
-    y += 6;
-    doc.setFontSize(13);
-    doc.text(this.translate.instant('facture.detailTitre'), 20, y);
-    y += 8;
-    doc.setFontSize(11);
-
-    for (const item of this.commande.plats) {
-      const sousTotal = item.plat.prix * item.quantite;
-      doc.text(`${item.plat.nom}  x${item.quantite}`, 20, y);
-      doc.text(`${sousTotal} FCFA`, 160, y);
-      y += 7;
-    }
-
-    y += 6;
-    doc.setFontSize(13);
-    doc.text(`${this.translate.instant('facture.totalLabel')} ${this.commande.total} FCFA`, 20, y);
-    y += 10;
-
-    if (this.commande.allergies) {
-      doc.setFontSize(10);
-      doc.text(`${this.translate.instant('facture.allergiesLabel')} ${this.commande.allergies}`, 20, y);
-      y += 7;
-    }
-
-    doc.setFontSize(9);
-    doc.text(this.translate.instant('facture.merci'), 20, y + 10);
-
-    doc.save(`facture-commande-${this.commande.id}.pdf`);
   }
 }

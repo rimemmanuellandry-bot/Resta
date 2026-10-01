@@ -4,6 +4,18 @@ import { Injectable } from '@angular/core';
   providedIn: 'root'
 })
 export class PaiementService {
+  /**
+   * IMPORTANT ARCHITECTURE / SÉCURITÉ :
+   * En production, l'appel à CinetPay (ou tout autre passerelle de paiement)
+   * avec une clé secrète API ne doit PAS être effectué directement depuis le navigateur.
+   * Il est fortement recommandé d'utiliser une fonction serveur (ex: Supabase Edge Function
+   * ou route API backend) pour que la clé API reste secrète et que le montant ne puisse pas
+   * être altéré côté client.
+   *
+   * Exemple recommandé :
+   * const response = await fetch('/api/initier-paiement', { ... });
+   */
+
   private apiKey = 'TA_CLE_API_ICI';
   private siteId = 'TON_SITE_ID_ICI';
   private apiUrl = 'https://api-checkout.cinetpay.com/v2/payment';
@@ -20,7 +32,7 @@ export class PaiementService {
       description: 'Commande Resta #' + commandeId,
       customer_phone_number: telephone,
       notify_url: 'https://ton-domaine.com/api/cinetpay-webhook',
-      return_url: 'https://ton-domaine.com/commande-status',
+      return_url: 'https://ton-domaine.com/commande-status?id=' + commandeId,
       channels: 'MOBILE_MONEY',
     };
 

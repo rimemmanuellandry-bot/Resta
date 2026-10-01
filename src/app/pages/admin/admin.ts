@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -57,7 +57,7 @@ export interface Plat {
   templateUrl: './admin.html',
   styleUrl: './admin.css'
 })
-export class Admin implements OnInit {
+export class Admin implements OnInit, OnDestroy {
   reservations: Reservation[] = [];
   commandes: Commande[] = [];
   plats: Plat[] = [];
@@ -67,6 +67,7 @@ export class Admin implements OnInit {
   etapesLivraison = ['reçue', 'en préparation', 'prête', 'en route', 'livrée'];
   platEnEditionId: number | null = null;
   restaurantId: string | null = null;
+  private intervalId: any = null;
 
   constructor(
     private cdr: ChangeDetectorRef,
@@ -75,28 +76,51 @@ export class Admin implements OnInit {
     public etapesCommande: EtapesCommandeService
   ) {}
 
-  ngOnInit() {
+  async ngOnInit() {
+    const { data: { session } } = await supabase.auth.getSession();
+    let adminRestaurantId: string | null = null;
+
+    if (session) {
+      const { data: adminRecord } = await supabase
+        .from('admins')
+        .select('restaurant_id')
+        .eq('user_id', session.user.id)
+        .maybeSingle();
+      if (adminRecord) {
+        adminRestaurantId = adminRecord.restaurant_id;
+      }
+    }
+
     this.route.queryParams.subscribe(params => {
-      this.restaurantId = params['restaurant_id'] || null;
+      const paramId = params['restaurant_id'] || null;
+      // Si l'utilisateur est admin d'un restaurant spécifique, on privilégie ou valide son affectation
+      this.restaurantId = adminRestaurantId || paramId;
 
       if (!this.restaurantId) {
-        console.error('Aucun restaurant_id fourni — ajoute ?restaurant_id=... à l\'URL admin.');
+        console.error('Aucun restaurant_id fourni ou trouvé pour cet administrateur.');
         return;
       }
 
       this.chargerCommandes();
       this.chargerPlats();
       this.chargerReservations();
-
+      this.chargerDemandesEvenement();
     });
 
-    setInterval(() => {
+    this.intervalId = setInterval(() => {
       if (this.restaurantId) {
         this.chargerCommandes();
         this.chargerReservations();
         this.chargerDemandesEvenement();
       }
     }, 3000);
+  }
+
+  ngOnDestroy() {
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+      this.intervalId = null;
+    }
   }
 
   getEtapes(commande: Commande): string[] {
