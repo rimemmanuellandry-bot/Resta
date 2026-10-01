@@ -1,0 +1,135 @@
+<!-- 1. Bannière Toast Notification Resta (En haut à droite) -->
+<div
+  *ngIf="chatService.notificationToast() as toast"
+  class="resta-toast-banner"
+  (click)="ouvrirDepuisToast()"
+>
+  <div class="toast-icone-wrapper">
+    <img src="/icons/icon-192x192.png" alt="Resta" class="toast-logo" />
+  </div>
+  <div class="toast-contenu">
+    <div class="toast-header-ligne">
+      <span class="toast-titre">{{ toast.titre }}</span>
+      <span class="toast-badge-resta">Resta</span>
+    </div>
+    <p class="toast-texte">{{ toast.message }}</p>
+  </div>
+  <button
+    type="button"
+    class="toast-btn-fermer"
+    (click)="$event.stopPropagation(); chatService.fermerToast()"
+    aria-label="Fermer"
+  >
+    ✕
+  </button>
+</div>
+
+<!-- 2. Bouton Flottant Messagerie Resta (En bas à droite) -->
+<button
+  type="button"
+  class="btn-flottant-chat"
+  [class.actif]="ouvert"
+  (click)="toggleWidget()"
+  aria-label="Discuter avec le restaurant Resta"
+>
+  <!-- Icône de discussion moderne Resta -->
+  <svg viewBox="0 0 24 24" width="28" height="28" fill="#d4af37">
+    <path d="M20 2H4C2.9 2 2 2.9 2 4V22L6 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2M20 16H5.17L4 17.17V4H20V16Z"/>
+    <circle cx="7.5" cy="10" r="1.5" fill="#d4af37"/>
+    <circle cx="12" cy="10" r="1.5" fill="#d4af37"/>
+    <circle cx="16.5" cy="10" r="1.5" fill="#d4af37"/>
+  </svg>
+  <span *ngIf="nonLusWidget > 0" class="badge-compteur">{{ nonLusWidget }}</span>
+</button>
+
+<!-- 3. Fenêtre de Chat Flottante Resta -->
+<div *ngIf="ouvert" class="resta-chat-dialog">
+  <!-- En-tête Resta (Vert forêt #1a3c2e et bordure or #d4af37) -->
+  <div class="chat-header">
+    <div class="chat-profil">
+      <div class="avatar-cercle">
+        <img src="/icons/icon-192x192.png" alt="Resta" class="avatar-img" />
+      </div>
+      <div class="profil-infos">
+        <h3 class="profil-nom">{{ nomRestaurant }}</h3>
+        <span class="profil-statut">
+          <span class="point-en-ligne"></span>
+          {{ 'chat.enLigne' | translate }}
+        </span>
+      </div>
+    </div>
+
+    <button type="button" class="btn-fermer-chat" (click)="fermerWidget()" aria-label="Fermer la discussion">
+      ✕
+    </button>
+  </div>
+
+  <!-- Corps de la discussion -->
+  <div #messagesContainer class="chat-body">
+    <!-- Non connecté -->
+    <div *ngIf="!estConnecte" class="connexion-requise-carte">
+      <div class="icone-verrou">💬</div>
+      <h4>{{ 'chat.titre' | translate }}</h4>
+      <p>{{ 'chat.sousTitre' | translate }}</p>
+      <a routerLink="/connexion" (click)="fermerWidget()" class="btn-se-connecter-chat">
+        {{ 'header.seConnecter' | translate }}
+      </a>
+    </div>
+
+    <!-- Utilisateur connecté -->
+    <ng-container *ngIf="estConnecte">
+      <!-- Indicateur de chargement -->
+      <div *ngIf="chargement" class="chargement-spin">
+        <div class="spin-rond"></div>
+      </div>
+
+      <!-- Aucun message -->
+      <div *ngIf="!chargement && messages.length === 0" class="aucun-message-box">
+        <p>{{ 'chat.aucunMessage' | translate }}</p>
+      </div>
+
+      <!-- Liste des bulles de messages -->
+      <div
+        *ngFor="let msg of messages"
+        class="bulle-wrapper"
+        [class.envoye]="msg.expediteur_id === userId"
+        [class.recu]="msg.expediteur_id !== userId"
+      >
+        <div class="bulle-message">
+          <div *ngIf="msg.expediteur_role === 'admin' && msg.expediteur_id !== userId" class="nom-expediteur">
+            {{ 'chat.restaurant' | translate }}
+          </div>
+          <p class="texte-message">{{ msg.texte }}</p>
+          <div class="meta-message">
+            <span class="heure-message">{{ formaterHeure(msg.created_at) }}</span>
+            <span *ngIf="msg.expediteur_id === userId" class="coches-lecture" [class.lues]="msg.lu">
+              ✓✓
+            </span>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+
+  <!-- Pied de page avec saisie aux couleurs Resta -->
+  <div *ngIf="estConnecte" class="chat-footer">
+    <input
+      type="text"
+      [(ngModel)]="nouveauMessage"
+      (keydown.enter)="envoyer()"
+      [placeholder]="'chat.placeholder' | translate"
+      class="input-message-resta"
+    />
+    <button
+      type="button"
+      class="btn-envoyer-resta"
+      (click)="envoyer()"
+      [disabled]="!nouveauMessage.trim()"
+      aria-label="Envoyer le message"
+    >
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="#ffffff">
+        <path d="M2.01 21L23 12L2.01 3L2 10L17 12L2 14L2.01 21Z"/>
+      </svg>
+    </button>
+  </div>
+</div>

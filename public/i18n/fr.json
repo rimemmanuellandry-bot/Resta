@@ -278,5 +278,16 @@
     "reservationRefusee": "Votre réservation du {{date}} a été refusée.",
     "evenementConfirme": "Votre demande de privatisation du {{date}} a été confirmée.",
     "evenementRefuse": "Votre demande de privatisation du {{date}} a été refusée."
+  },
+  "chat": {
+    "titre": "Discuter avec le restaurant",
+    "sousTitre": "Une question ? Échangez en direct avec votre restaurant",
+    "enLigne": "En ligne",
+    "placeholder": "Écrivez votre message...",
+    "envoyer": "Envoyer",
+    "aucunMessage": "Aucun message. Envoyez un premier message !",
+    "restaurant": "Restaurant Resta",
+    "discussionsTitre": "Messagerie Resta en direct",
+    "selectionnerDiscussion": "Cliquez sur une discussion à gauche pour répondre au client."
   }
 }

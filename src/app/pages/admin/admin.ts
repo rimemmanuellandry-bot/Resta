@@ -4,6 +4,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { EtapesCommandeService } from '../../services/etapes-commande';
+import { ChatService, Message, ConversationResume } from '../../services/chat';
 import { supabase } from '../../supabase';
 
 interface Commande {
@@ -69,11 +70,19 @@ export class Admin implements OnInit, OnDestroy {
   restaurantId: string | null = null;
   private intervalId: any = null;
 
+  conversations: ConversationResume[] = [];
+  discussionActive: ConversationResume | null = null;
+  messagesDiscussionActive: Message[] = [];
+  reponseAdmin = '';
+  chargementChat = false;
+  adminUserId: string | null = null;
+
   constructor(
     private cdr: ChangeDetectorRef,
     private route: ActivatedRoute,
     private translate: TranslateService,
-    public etapesCommande: EtapesCommandeService
+    public etapesCommande: EtapesCommandeService,
+    public chatService: ChatService
   ) {}
 
   async ngOnInit() {
@@ -81,6 +90,7 @@ export class Admin implements OnInit, OnDestroy {
     let adminRestaurantId: string | null = null;
 
     if (session) {
+      this.adminUserId = session.user.id;
       const { data: adminRecord } = await supabase
         .from('admins')
         .select('restaurant_id')
@@ -105,13 +115,30 @@ export class Admin implements OnInit, OnDestroy {
       this.chargerPlats();
       this.chargerReservations();
       this.chargerDemandesEvenement();
+      this.chargerConversations();
     });
+
+    if (this.adminUserId) {
+      this.chatService.initialiserRealtime(this.adminUserId, (nouveauMsg) => {
+        if (this.restaurantId && nouveauMsg.restaurant_id === this.restaurantId) {
+          this.chargerConversations();
+          if (this.discussionActive && this.discussionActive.client_id === nouveauMsg.client_id) {
+            if (!this.messagesDiscussionActive.some(m => m.id === nouveauMsg.id)) {
+              this.messagesDiscussionActive.push(nouveauMsg);
+              this.chatService.marquerCommeLus(this.restaurantId, this.discussionActive.client_id, 'client');
+            }
+          }
+          this.cdr.detectChanges();
+        }
+      });
+    }
 
     this.intervalId = setInterval(() => {
       if (this.restaurantId) {
         this.chargerCommandes();
         this.chargerReservations();
         this.chargerDemandesEvenement();
+        this.chargerConversations();
       }
     }, 3000);
   }
@@ -340,5 +367,55 @@ export class Admin implements OnInit, OnDestroy {
     }
 
     this.chargerDemandesEvenement();
+  }
+
+  async chargerConversations() {
+    if (!this.restaurantId) return;
+    this.conversations = await this.chatService.chargerConversationsAdmin(this.restaurantId);
+    this.cdr.detectChanges();
+  }
+
+  async selectionnerConversation(conv: ConversationResume) {
+    this.discussionActive = conv;
+    conv.non_lus = 0;
+    this.chargementChat = true;
+    if (this.restaurantId) {
+      this.messagesDiscussionActive = await this.chatService.chargerMessages(this.restaurantId, conv.client_id);
+      await this.chatService.marquerCommeLus(this.restaurantId, conv.client_id, 'client');
+    }
+    this.chargementChat = false;
+    this.cdr.detectChanges();
+  }
+
+  async envoyerReponseAdmin() {
+    const texte = this.reponseAdmin.trim();
+    if (!texte || !this.restaurantId || !this.discussionActive || !this.adminUserId) {
+      return;
+    }
+
+    this.reponseAdmin = '';
+
+    const messageEnvoye = await this.chatService.envoyerMessage({
+      restaurantId: this.restaurantId,
+      clientId: this.discussionActive.client_id,
+      clientNom: this.discussionActive.client_nom,
+      expediteurId: this.adminUserId,
+      expediteurRole: 'admin',
+      texte,
+    });
+
+    if (messageEnvoye) {
+      if (!this.messagesDiscussionActive.some(m => m.id === messageEnvoye.id)) {
+        this.messagesDiscussionActive.push(messageEnvoye);
+      }
+      this.chargerConversations();
+      this.cdr.detectChanges();
+    }
+  }
+
+  formaterHeure(dateIso?: string): string {
+    if (!dateIso) return '';
+    const d = new Date(dateIso);
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
 }

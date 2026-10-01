@@ -173,4 +173,109 @@
 
     <p *ngIf="plats.length === 0" class="Aucune">{{ 'admin.menu.aucunPlat' | translate }}</p>
   </section>
+
+  <section class="gestion-messagerie">
+    <h2>💬 {{ 'chat.discussionsTitre' | translate }}</h2>
+
+    <div class="resta-admin-chat-wrapper">
+      <!-- Colonne de gauche : Liste des discussions -->
+      <div class="discussions-sidebar">
+        <div class="discussions-header">
+          <span>Messagerie Resta Direct</span>
+        </div>
+
+        <div *ngIf="conversations.length === 0" class="aucune-discussion">
+          <p>{{ 'chat.aucunMessage' | translate }}</p>
+        </div>
+
+        <div
+          *ngFor="let conv of conversations"
+          class="discussion-item"
+          [class.active]="discussionActive?.client_id === conv.client_id"
+          (click)="selectionnerConversation(conv)"
+        >
+          <div class="avatar-discussion">
+            {{ conv.client_nom ? conv.client_nom[0].toUpperCase() : 'C' }}
+          </div>
+          <div class="info-discussion">
+            <div class="ligne-haut">
+              <span class="nom-client">{{ conv.client_nom }}</span>
+              <span class="heure-dernier">{{ formaterHeure(conv.dernier_date) }}</span>
+            </div>
+            <div class="ligne-bas">
+              <span class="apercu-message">{{ conv.dernier_message }}</span>
+              <span *ngIf="conv.non_lus > 0" class="badge-non-lus">{{ conv.non_lus }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Colonne de droite : Fenêtre de discussion active -->
+      <div class="discussion-chat-zone">
+        <ng-container *ngIf="discussionActive; else aucunSelection">
+          <!-- Entête du chat -->
+          <div class="chat-zone-header">
+            <div class="avatar-discussion petit">
+              {{ discussionActive.client_nom ? discussionActive.client_nom[0].toUpperCase() : 'C' }}
+            </div>
+            <div>
+              <h4 class="chat-client-nom">{{ discussionActive.client_nom }}</h4>
+              <span class="chat-client-statut">Client en direct</span>
+            </div>
+          </div>
+
+          <!-- Liste des messages -->
+          <div class="chat-zone-messages">
+            <div *ngIf="chargementChat" class="chargement-spin">
+              <div class="spin-rond"></div>
+            </div>
+
+            <div
+              *ngFor="let msg of messagesDiscussionActive"
+              class="bulle-wrapper"
+              [class.envoye]="msg.expediteur_role === 'admin'"
+              [class.recu]="msg.expediteur_role === 'client'"
+            >
+              <div class="bulle-message">
+                <p class="texte-message">{{ msg.texte }}</p>
+                <div class="meta-message">
+                  <span class="heure-message">{{ formaterHeure(msg.created_at) }}</span>
+                  <span *ngIf="msg.expediteur_role === 'admin'" class="coches-lecture" [class.lues]="msg.lu">
+                    ✓✓
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Formulaire de réponse -->
+          <div class="chat-zone-footer">
+            <input
+              type="text"
+              [(ngModel)]="reponseAdmin"
+              (keydown.enter)="envoyerReponseAdmin()"
+              [placeholder]="'chat.placeholder' | translate"
+              class="input-admin-chat"
+            />
+            <button
+              type="button"
+              (click)="envoyerReponseAdmin()"
+              [disabled]="!reponseAdmin.trim()"
+              class="btn-admin-envoyer"
+            >
+              {{ 'chat.envoyer' | translate }}
+            </button>
+          </div>
+        </ng-container>
+
+        <ng-template #aucunSelection>
+          <div class="zone-vide-selection">
+            <div class="grand-icone-chat">💬</div>
+            <h3>Messagerie Resta</h3>
+            <p>{{ 'chat.selectionnerDiscussion' | translate }}</p>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+  </section>
 </div>
