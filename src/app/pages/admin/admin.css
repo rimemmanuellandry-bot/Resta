@@ -316,7 +316,8 @@
   color: #1a3c2e;
 }
 
-.statut-annulee {
+.statut-annulee,
+.statut-refusee {
   background: #fdecea;
   color: #c0392b;
 }

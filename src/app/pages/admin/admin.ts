@@ -208,6 +208,10 @@ export class Admin implements OnInit, OnDestroy {
   }
 
   async changerStatutReservation(reservation: Reservation, nouveauStatut: string) {
+    const ancienStatut = reservation.statut;
+    reservation.statut = nouveauStatut;
+    this.cdr.detectChanges();
+
     const { error } = await supabase
       .from('reservations')
       .update({ statut: nouveauStatut })
@@ -215,13 +219,24 @@ export class Admin implements OnInit, OnDestroy {
 
     if (error) {
       console.error('Erreur lors de la mise à jour de la réservation :', error);
+      alert('Impossible de modifier la réservation : ' + (error.message || 'Vérifiez les droits RLS sur Supabase.'));
+      reservation.statut = ancienStatut;
+      this.cdr.detectChanges();
       return;
     }
 
-    this.chargerReservations();
+    await this.chargerReservations();
   }
 
   async supprimerReservation(id: number) {
+    if (!confirm('Confirmez-vous la suppression de cette réservation ?')) {
+      return;
+    }
+
+    const anciennes = [...this.reservations];
+    this.reservations = this.reservations.filter(r => r.id !== id);
+    this.cdr.detectChanges();
+
     const { error } = await supabase
       .from('reservations')
       .delete()
@@ -229,10 +244,13 @@ export class Admin implements OnInit, OnDestroy {
 
     if (error) {
       console.error('Erreur lors de la suppression de la réservation :', error);
+      alert('Impossible de supprimer la réservation : ' + (error.message || 'Vérifiez les droits RLS sur Supabase.'));
+      this.reservations = anciennes;
+      this.cdr.detectChanges();
       return;
     }
 
-    this.chargerReservations();
+    await this.chargerReservations();
   }
 
   async chargerPlats() {
@@ -342,6 +360,10 @@ export class Admin implements OnInit, OnDestroy {
   }
 
   async changerStatutEvenement(demande: DemandeEvenement, nouveauStatut: string) {
+    const ancien = demande.statut;
+    demande.statut = nouveauStatut;
+    this.cdr.detectChanges();
+
     const { error } = await supabase
       .from('demandes_evenement')
       .update({ statut: nouveauStatut })
@@ -349,13 +371,24 @@ export class Admin implements OnInit, OnDestroy {
 
     if (error) {
       console.error('Erreur lors de la mise à jour :', error);
+      alert('Impossible de modifier la demande d\'événement : ' + (error.message || 'Vérifiez les droits RLS sur Supabase.'));
+      demande.statut = ancien;
+      this.cdr.detectChanges();
       return;
     }
 
-    this.chargerDemandesEvenement();
+    await this.chargerDemandesEvenement();
   }
 
   async supprimerDemandeEvenement(id: number) {
+    if (!confirm('Confirmez-vous la suppression de cette demande d\'événement ?')) {
+      return;
+    }
+
+    const anciennes = [...this.demandesEvenement];
+    this.demandesEvenement = this.demandesEvenement.filter(d => d.id !== id);
+    this.cdr.detectChanges();
+
     const { error } = await supabase
       .from('demandes_evenement')
       .delete()
@@ -363,10 +396,13 @@ export class Admin implements OnInit, OnDestroy {
 
     if (error) {
       console.error('Erreur lors de la suppression :', error);
+      alert('Impossible de supprimer la demande d\'événement : ' + (error.message || 'Vérifiez les droits RLS sur Supabase.'));
+      this.demandesEvenement = anciennes;
+      this.cdr.detectChanges();
       return;
     }
 
-    this.chargerDemandesEvenement();
+    await this.chargerDemandesEvenement();
   }
 
   async chargerConversations() {
