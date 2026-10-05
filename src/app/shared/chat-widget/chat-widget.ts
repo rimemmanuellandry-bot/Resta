@@ -1,7 +1,9 @@
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef, ChangeDetectorRef, Inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ChatService, Message } from '../../services/chat';
 import { PanierService } from '../../services/panier';
@@ -18,6 +20,7 @@ export class ChatWidget implements OnInit, OnDestroy {
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
 
   ouvert = false;
+  estVisible = false;
   estConnecte = false;
   userId: string | null = null;
   userName = 'Client';
@@ -30,6 +33,28 @@ export class ChatWidget implements OnInit, OnDestroy {
   nouveauMessage = '';
   chargement = false;
   nonLusWidget = 0;
+
+  private routerSub?: Subscription;
+  private realtimeListener = (nouveauMsg: Message) => {
+    // Si le widget n'est pas censé être visible (admin ou pages auth), ignorer
+    if (!this.estVisible) return;
+
+    if (
+      nouveauMsg.client_id === this.userId &&
+      (!this.restaurantId || String(nouveauMsg.restaurant_id) === String(this.restaurantId))
+    ) {
+      if (!this.messages.some(m => m.id === nouveauMsg.id)) {
+        this.messages.push(nouveauMsg);
+      }
+      if (!this.ouvert) {
+        this.nonLusWidget++;
+      } else {
+        this.marquerLus();
+      }
+      this.defilerBas();
+      this.cdr.detectChanges();
+    }
+  };
 
   constructor(
     public chatService: ChatService,
@@ -44,6 +69,14 @@ export class ChatWidget implements OnInit, OnDestroy {
       return;
     }
 
+    this.determinerVisibilite(this.router.url);
+
+    this.routerSub = this.router.events
+      .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
+      .subscribe(e => {
+        this.determinerVisibilite(e.urlAfterRedirects || e.url);
+      });
+
     await this.verifierUtilisateur();
 
     supabase.auth.onAuthStateChange(async (_event, session) => {
@@ -51,17 +84,37 @@ export class ChatWidget implements OnInit, OnDestroy {
         await this.verifierUtilisateur();
       } else {
         this.estConnecte = false;
+        this.estAdmin = false;
         this.userId = null;
         this.messages = [];
         this.nonLusWidget = 0;
-        this.chatService.desinscrireRealtime();
+        this.chatService.retirerListener(this.realtimeListener);
+        this.determinerVisibilite(this.router.url);
         this.cdr.detectChanges();
       }
     });
   }
 
   ngOnDestroy() {
-    this.chatService.desinscrireRealtime();
+    if (this.routerSub) {
+      this.routerSub.unsubscribe();
+    }
+    this.chatService.retirerListener(this.realtimeListener);
+  }
+
+  determinerVisibilite(url: string) {
+    const chemin = (url || '').split('?')[0].replace(/\/+$/, '') || '/';
+    const estPageExclue =
+      chemin === '/' ||
+      chemin === '/connexion' ||
+      chemin.startsWith('/admin') ||
+      chemin.startsWith('/statistiques');
+
+    this.estVisible = !estPageExclue && !this.estAdmin;
+    if (!this.estVisible && this.ouvert) {
+      this.ouvert = false;
+    }
+    this.cdr.detectChanges();
   }
 
   async verifierUtilisateur() {
@@ -69,6 +122,8 @@ export class ChatWidget implements OnInit, OnDestroy {
     if (!session) {
       this.estConnecte = false;
       this.userId = null;
+      this.estAdmin = false;
+      this.determinerVisibilite(this.router.url);
       return;
     }
 
@@ -85,31 +140,21 @@ export class ChatWidget implements OnInit, OnDestroy {
 
     if (adminRecord) {
       this.estAdmin = true;
-      this.restaurantId = adminRecord.restaurant_id;
+      this.restaurantId = adminRecord.restaurant_id ? String(adminRecord.restaurant_id) : null;
     } else {
       this.estAdmin = false;
       await this.determinerRestaurant();
     }
 
-    // Initialiser le canal temps réel Supabase
-    this.chatService.initialiserRealtime(this.userId, (nouveauMsg) => {
-      if (
-        (nouveauMsg.client_id === this.userId && String(nouveauMsg.restaurant_id) === String(this.restaurantId)) ||
-        (this.estAdmin && String(nouveauMsg.restaurant_id) === String(this.restaurantId))
-      ) {
-        this.messages.push(nouveauMsg);
-        if (!this.ouvert) {
-          this.nonLusWidget++;
-        } else {
-          this.marquerLus();
-        }
-        this.defilerBas();
-        this.cdr.detectChanges();
-      }
-    });
+    this.determinerVisibilite(this.router.url);
 
-    if (this.restaurantId) {
-      await this.chargerHistorique();
+    // Initialiser le canal temps réel Supabase seulement si ce n'est pas un admin (l'admin gère via l'interface admin dédiée)
+    if (!this.estAdmin) {
+      this.chatService.initialiserRealtime(this.userId, this.realtimeListener);
+
+      if (this.restaurantId) {
+        await this.chargerHistorique();
+      }
     }
 
     this.cdr.detectChanges();

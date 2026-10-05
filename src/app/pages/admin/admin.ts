@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -59,6 +59,8 @@ export interface Plat {
   styleUrl: './admin.css'
 })
 export class Admin implements OnInit, OnDestroy {
+  @ViewChild('chatZoneMessages') private chatZoneMessagesRef?: ElementRef;
+
   reservations: Reservation[] = [];
   commandes: Commande[] = [];
   plats: Plat[] = [];
@@ -76,6 +78,22 @@ export class Admin implements OnInit, OnDestroy {
   reponseAdmin = '';
   chargementChat = false;
   adminUserId: string | null = null;
+
+  private realtimeListener = (nouveauMsg: Message) => {
+    const concerneAdmin = !this.restaurantId || !nouveauMsg.restaurant_id || String(nouveauMsg.restaurant_id) === String(this.restaurantId);
+    if (concerneAdmin) {
+      this.chargerConversations();
+      if (this.discussionActive && this.discussionActive.client_id === nouveauMsg.client_id) {
+        if (!this.messagesDiscussionActive.some(m => m.id === nouveauMsg.id)) {
+          this.messagesDiscussionActive.push(nouveauMsg);
+          const restId = this.restaurantId || (nouveauMsg.restaurant_id ? String(nouveauMsg.restaurant_id) : '1');
+          this.chatService.marquerCommeLus(restId, this.discussionActive.client_id, 'client');
+          this.defilerBasDiscussion();
+        }
+      }
+      this.cdr.detectChanges();
+    }
+  };
 
   constructor(
     private cdr: ChangeDetectorRef,
@@ -96,51 +114,60 @@ export class Admin implements OnInit, OnDestroy {
         .select('restaurant_id')
         .eq('user_id', session.user.id)
         .maybeSingle();
-      if (adminRecord) {
-        adminRestaurantId = adminRecord.restaurant_id;
+      if (adminRecord && adminRecord.restaurant_id) {
+        adminRestaurantId = String(adminRecord.restaurant_id);
       }
     }
 
-    this.route.queryParams.subscribe(params => {
+    // Récupérer le premier restaurant disponible si aucun n'est configuré
+    if (!adminRestaurantId) {
+      const { data: resto } = await supabase
+        .from('restaurants')
+        .select('id')
+        .order('id', { ascending: true })
+        .limit(1)
+        .maybeSingle();
+      if (resto?.id) {
+        adminRestaurantId = String(resto.id);
+      }
+    }
+
+    this.route.queryParams.subscribe(async params => {
       const paramId = params['restaurant_id'] || null;
-      // Si l'utilisateur est admin d'un restaurant spécifique, on privilégie ou valide son affectation
-      this.restaurantId = adminRestaurantId || paramId;
+      this.restaurantId = paramId || adminRestaurantId;
 
       if (!this.restaurantId) {
-        console.error('Aucun restaurant_id fourni ou trouvé pour cet administrateur.');
-        return;
+        const { data: resto } = await supabase
+          .from('restaurants')
+          .select('id')
+          .order('id', { ascending: true })
+          .limit(1)
+          .maybeSingle();
+        if (resto?.id) {
+          this.restaurantId = String(resto.id);
+        }
       }
 
       this.chargerCommandes();
       this.chargerPlats();
       this.chargerReservations();
       this.chargerDemandesEvenement();
-      this.chargerConversations();
+      await this.chargerConversations();
     });
 
     if (this.adminUserId) {
-      this.chatService.initialiserRealtime(this.adminUserId, (nouveauMsg) => {
-        if (this.restaurantId && String(nouveauMsg.restaurant_id) === String(this.restaurantId)) {
-          this.chargerConversations();
-          if (this.discussionActive && this.discussionActive.client_id === nouveauMsg.client_id) {
-            if (!this.messagesDiscussionActive.some(m => m.id === nouveauMsg.id)) {
-              this.messagesDiscussionActive.push(nouveauMsg);
-              this.chatService.marquerCommeLus(this.restaurantId, this.discussionActive.client_id, 'client');
-            }
-          }
-          this.cdr.detectChanges();
-        }
-      });
+      this.chatService.initialiserRealtime(this.adminUserId, this.realtimeListener);
     }
 
-    this.intervalId = setInterval(() => {
-      if (this.restaurantId) {
-        this.chargerCommandes();
-        this.chargerReservations();
-        this.chargerDemandesEvenement();
-        this.chargerConversations();
+    this.intervalId = setInterval(async () => {
+      this.chargerCommandes();
+      this.chargerReservations();
+      this.chargerDemandesEvenement();
+      await this.chargerConversations();
+      if (this.discussionActive) {
+        await this.rafraichirDiscussionActive();
       }
-    }, 3000);
+    }, 4000);
   }
 
   ngOnDestroy() {
@@ -148,6 +175,7 @@ export class Admin implements OnInit, OnDestroy {
       clearInterval(this.intervalId);
       this.intervalId = null;
     }
+    this.chatService.retirerListener(this.realtimeListener);
   }
 
   getEtapes(commande: Commande): string[] {
@@ -405,8 +433,16 @@ export class Admin implements OnInit, OnDestroy {
     await this.chargerDemandesEvenement();
   }
 
+  defilerBasDiscussion() {
+    setTimeout(() => {
+      if (this.chatZoneMessagesRef) {
+        const el = this.chatZoneMessagesRef.nativeElement;
+        el.scrollTop = el.scrollHeight;
+      }
+    }, 80);
+  }
+
   async chargerConversations() {
-    if (!this.restaurantId) return;
     this.conversations = await this.chatService.chargerConversationsAdmin(this.restaurantId);
     this.cdr.detectChanges();
   }
@@ -415,24 +451,41 @@ export class Admin implements OnInit, OnDestroy {
     this.discussionActive = conv;
     conv.non_lus = 0;
     this.chargementChat = true;
-    if (this.restaurantId) {
-      this.messagesDiscussionActive = await this.chatService.chargerMessages(this.restaurantId, conv.client_id);
-      await this.chatService.marquerCommeLus(this.restaurantId, conv.client_id, 'client');
-    }
+    this.messagesDiscussionActive = await this.chatService.chargerMessages(this.restaurantId, conv.client_id);
+    const restId = this.restaurantId || (this.messagesDiscussionActive[0]?.restaurant_id ? String(this.messagesDiscussionActive[0].restaurant_id) : '1');
+    await this.chatService.marquerCommeLus(restId, conv.client_id, 'client');
     this.chargementChat = false;
     this.cdr.detectChanges();
+    this.defilerBasDiscussion();
+  }
+
+  async rafraichirDiscussionActive() {
+    if (!this.discussionActive) return;
+    const derniers = await this.chatService.chargerMessages(this.restaurantId, this.discussionActive.client_id);
+    if (
+      derniers.length !== this.messagesDiscussionActive.length ||
+      (derniers.length > 0 && derniers[derniers.length - 1].id !== this.messagesDiscussionActive[this.messagesDiscussionActive.length - 1]?.id)
+    ) {
+      this.messagesDiscussionActive = derniers;
+      const restId = this.restaurantId || (derniers[0]?.restaurant_id ? String(derniers[0].restaurant_id) : '1');
+      await this.chatService.marquerCommeLus(restId, this.discussionActive.client_id, 'client');
+      this.cdr.detectChanges();
+      this.defilerBasDiscussion();
+    }
   }
 
   async envoyerReponseAdmin() {
     const texte = this.reponseAdmin.trim();
-    if (!texte || !this.restaurantId || !this.discussionActive || !this.adminUserId) {
+    if (!texte || !this.discussionActive || !this.adminUserId) {
       return;
     }
+
+    const restId = this.restaurantId || (this.messagesDiscussionActive[0]?.restaurant_id ? String(this.messagesDiscussionActive[0].restaurant_id) : '1');
 
     this.reponseAdmin = '';
 
     const messageEnvoye = await this.chatService.envoyerMessage({
-      restaurantId: this.restaurantId,
+      restaurantId: restId,
       clientId: this.discussionActive.client_id,
       clientNom: this.discussionActive.client_nom,
       expediteurId: this.adminUserId,
@@ -446,6 +499,7 @@ export class Admin implements OnInit, OnDestroy {
       }
       this.chargerConversations();
       this.cdr.detectChanges();
+      this.defilerBasDiscussion();
     }
   }
 

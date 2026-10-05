@@ -40,6 +40,7 @@ export class ChatService {
   private activeChannel: any = null;
   private currentUserId: string | null = null;
   private toastTimeout: any = null;
+  private listeners = new Set<(msg: Message) => void>();
 
   constructor() {
     this.demanderPermissionNotifications();
@@ -103,11 +104,6 @@ export class ChatService {
     }
   }
 
-  // Alias rétrocompatible
-  jouerSonWhatsApp() {
-    this.jouerSonNotification();
-  }
-
   /**
    * Affiche la bannière flottante de notification Resta
    */
@@ -154,54 +150,80 @@ export class ChatService {
    */
   initialiserRealtime(userId: string, onMessageRecu?: (msg: Message) => void) {
     this.currentUserId = userId;
-
-    if (this.activeChannel) {
-      supabase.removeChannel(this.activeChannel);
-      this.activeChannel = null;
+    if (onMessageRecu) {
+      this.listeners.add(onMessageRecu);
     }
 
-    this.activeChannel = supabase
-      .channel('resta-chat-channel')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'messages' },
-        payload => {
-          const msg = payload.new as Message;
-          // Si le message ne vient pas de moi
-          if (msg.expediteur_id !== this.currentUserId) {
-            const titre = msg.expediteur_role === 'admin'
-              ? 'Resta (Restaurant)'
-              : (msg.client_nom || 'Nouveau client');
-            this.afficherToast(titre, msg.texte, {
-              restaurant_id: msg.restaurant_id,
-              client_id: msg.client_id,
+    if (!this.activeChannel) {
+      this.activeChannel = supabase
+        .channel('resta-chat-channel')
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'messages' },
+          payload => {
+            const msg = payload.new as Message;
+            // Si le message ne vient pas de moi
+            if (msg.expediteur_id !== this.currentUserId) {
+              const titre = msg.expediteur_role === 'admin'
+                ? 'Resta (Restaurant)'
+                : (msg.client_nom || 'Nouveau client');
+              this.afficherToast(titre, msg.texte, {
+                restaurant_id: String(msg.restaurant_id),
+                client_id: msg.client_id,
+              });
+              this.unreadCountTotal.update(v => v + 1);
+            }
+            this.listeners.forEach(cb => {
+              try {
+                cb(msg);
+              } catch (e) {
+                console.error('Erreur listener Realtime chat :', e);
+              }
             });
-            this.unreadCountTotal.update(v => v + 1);
           }
-          if (onMessageRecu) {
-            onMessageRecu(msg);
-          }
-        }
-      )
-      .subscribe();
+        )
+        .subscribe();
+    }
+  }
+
+  retirerListener(onMessageRecu: (msg: Message) => void) {
+    this.listeners.delete(onMessageRecu);
   }
 
   desinscrireRealtime() {
+    this.listeners.clear();
     if (this.activeChannel) {
       supabase.removeChannel(this.activeChannel);
       this.activeChannel = null;
     }
   }
 
-  async chargerMessages(restaurantId: string, clientId: string): Promise<Message[]> {
-    const { data, error } = await supabase
+  async chargerMessages(restaurantId: string | null | undefined, clientId: string): Promise<Message[]> {
+    let query = supabase
       .from('messages')
       .select('*')
-      .eq('restaurant_id', restaurantId)
       .eq('client_id', clientId)
       .order('created_at', { ascending: true });
 
-    if (error) {
+    if (restaurantId) {
+      query = query.eq('restaurant_id', restaurantId);
+    }
+
+    let { data, error } = await query;
+
+    // Si aucune donnée trouvée avec le filtre restaurant_id, essayer sans le filtre
+    if ((!data || data.length === 0) && restaurantId) {
+      const fallback = await supabase
+        .from('messages')
+        .select('*')
+        .eq('client_id', clientId)
+        .order('created_at', { ascending: true });
+      if (fallback.data && fallback.data.length > 0) {
+        data = fallback.data;
+      }
+    }
+
+    if (error && !data) {
       console.warn('Erreur chargement messages :', error);
       return [];
     }
@@ -209,7 +231,7 @@ export class ChatService {
   }
 
   async envoyerMessage(params: {
-    restaurantId: string;
+    restaurantId: string | number;
     clientId: string;
     clientNom: string;
     expediteurId: string;
@@ -240,30 +262,52 @@ export class ChatService {
     return data as Message;
   }
 
-  async marquerCommeLus(restaurantId: string, clientId: string, expediteurRoleAEffacer: 'client' | 'admin') {
-    await supabase
+  async marquerCommeLus(restaurantId: string | null | undefined, clientId: string, expediteurRoleAEffacer: 'client' | 'admin') {
+    let query = supabase
       .from('messages')
       .update({ lu: true })
-      .eq('restaurant_id', restaurantId)
       .eq('client_id', clientId)
       .eq('expediteur_role', expediteurRoleAEffacer)
       .eq('lu', false);
+
+    if (restaurantId) {
+      query = query.eq('restaurant_id', restaurantId);
+    }
+
+    await query;
   }
 
-  async chargerConversationsAdmin(restaurantId: string): Promise<ConversationResume[]> {
-    const { data, error } = await supabase
+  async chargerConversationsAdmin(restaurantId?: string | null): Promise<ConversationResume[]> {
+    let query = supabase
       .from('messages')
       .select('*')
-      .eq('restaurant_id', restaurantId)
       .order('created_at', { ascending: false });
 
-    if (error || !data) {
+    if (restaurantId) {
+      query = query.eq('restaurant_id', restaurantId);
+    }
+
+    let { data, error } = await query;
+
+    // Si aucune conversation trouvée avec restaurantId, récupérer toutes les conversations accessibles
+    if ((!data || data.length === 0) && restaurantId) {
+      const fallback = await supabase
+        .from('messages')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (fallback.data && fallback.data.length > 0) {
+        data = fallback.data;
+      }
+    }
+
+    if (error && !data) {
+      console.warn('Erreur chargement conversations admin :', error);
       return [];
     }
 
     const conversationsMap = new Map<string, ConversationResume>();
 
-    for (const msg of data as Message[]) {
+    for (const msg of (data || []) as Message[]) {
       if (!conversationsMap.has(msg.client_id)) {
         conversationsMap.set(msg.client_id, {
           client_id: msg.client_id,
