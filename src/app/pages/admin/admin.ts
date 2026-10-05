@@ -120,7 +120,7 @@ export class Admin implements OnInit, OnDestroy {
 
     if (this.adminUserId) {
       this.chatService.initialiserRealtime(this.adminUserId, (nouveauMsg) => {
-        if (this.restaurantId && nouveauMsg.restaurant_id === this.restaurantId) {
+        if (this.restaurantId && String(nouveauMsg.restaurant_id) === String(this.restaurantId)) {
           this.chargerConversations();
           if (this.discussionActive && this.discussionActive.client_id === nouveauMsg.client_id) {
             if (!this.messagesDiscussionActive.some(m => m.id === nouveauMsg.id)) {

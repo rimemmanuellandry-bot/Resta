@@ -3,7 +3,7 @@ import { supabase } from '../supabase';
 
 export interface Message {
   id?: number;
-  restaurant_id: string;
+  restaurant_id: string | number;
   client_id: string;
   client_nom?: string;
   expediteur_id: string;

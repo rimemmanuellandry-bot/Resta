@@ -94,8 +94,8 @@ export class ChatWidget implements OnInit, OnDestroy {
     // Initialiser le canal temps réel Supabase
     this.chatService.initialiserRealtime(this.userId, (nouveauMsg) => {
       if (
-        (nouveauMsg.client_id === this.userId && nouveauMsg.restaurant_id === this.restaurantId) ||
-        (this.estAdmin && nouveauMsg.restaurant_id === this.restaurantId)
+        (nouveauMsg.client_id === this.userId && String(nouveauMsg.restaurant_id) === String(this.restaurantId)) ||
+        (this.estAdmin && String(nouveauMsg.restaurant_id) === String(this.restaurantId))
       ) {
         this.messages.push(nouveauMsg);
         if (!this.ouvert) {
