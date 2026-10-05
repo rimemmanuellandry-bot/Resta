@@ -3,13 +3,7 @@
     <h2>{{ 'evenement.titre' | translate }}</h2>
     <p class="sous-titre">{{ 'evenement.sousTitre' | translate }}</p>
 
-    <div *ngIf="demandeEnvoyee" class="confirmation">
-      <p>{{ 'evenement.confirmationTexte1' | translate }}</p>
-      <p>{{ 'evenement.confirmationTexte2' | translate }}</p>
-      <a routerLink="/bienvenue">{{ 'evenement.retourAccueil' | translate }}</a>
-    </div>
-
-    <form *ngIf="!demandeEnvoyee" (ngSubmit)="envoyerDemande()">
+    <form (ngSubmit)="envoyerDemande()">
       <div class="champ">
         <label>{{ 'evenement.typePrestationLabel' | translate }}</label>
         <select [(ngModel)]="typePrestation" name="typePrestation">

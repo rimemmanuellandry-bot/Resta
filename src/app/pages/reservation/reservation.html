@@ -3,13 +3,7 @@
     <h2>{{ 'reservation.titre' | translate }}</h2>
     <p class="sous-titre">{{ 'reservation.sousTitre' | translate }}</p>
 
-    <div *ngIf="reservationConfirmee" class="confirmation">
-      <p>{{ 'reservation.confirmationTexte1' | translate }}</p>
-      <p>{{ 'reservation.confirmationTexte2' | translate }}</p>
-      <a routerLink="/bienvenue">{{ 'reservation.retourAccueil' | translate }}</a>
-    </div>
-
-    <form *ngIf="!reservationConfirmee" (ngSubmit)="envoyerReservation()">
+    <form (ngSubmit)="envoyerReservation()">
       <div class="ligne-double">
         <div class="champ">
           <label>{{ 'reservation.dateLabel' | translate }}</label>
