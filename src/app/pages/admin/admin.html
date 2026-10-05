@@ -174,7 +174,7 @@
     <p *ngIf="plats.length === 0" class="Aucune">{{ 'admin.menu.aucunPlat' | translate }}</p>
   </section>
 
-  <section class="gestion-messagerie">
+  <section id="section-messagerie" class="gestion-messagerie">
     <h2>💬 {{ 'chat.discussionsTitre' | translate }}</h2>
 
     <div class="resta-admin-chat-wrapper">
@@ -235,17 +235,87 @@
               class="bulle-wrapper"
               [class.envoye]="msg.expediteur_role === 'admin'"
               [class.recu]="msg.expediteur_role === 'client'"
+              (touchstart)="onTouchStart($event, msg)"
+              (touchmove)="onTouchMove($event, msg)"
+              (touchend)="onTouchEnd($event, msg)"
             >
-              <div class="bulle-message">
-                <p class="texte-message">{{ msg.texte }}</p>
-                <div class="meta-message">
-                  <span class="heure-message">{{ formaterHeure(msg.created_at) }}</span>
-                  <span *ngIf="msg.expediteur_role === 'admin'" class="coches-lecture" [class.lues]="msg.lu">
-                    ✓✓
-                  </span>
+              <div class="bulle-conteneur-action" [style.transform]="getSwipeTransform(msg)">
+                <!-- Indicateur visuel swipe glisser pour répondre -->
+                <div class="indicateur-swipe-reponse" *ngIf="swipeMessageId === msg.id && swipeDeltaX > 20">
+                  ↩️
+                </div>
+
+                <div class="bulle-message" [class.supprime]="msg.supprime_pour_tous">
+                  <!-- Citation si c'est une réponse à un message -->
+                  <div *ngIf="msg.reponse_a_texte && !msg.supprime_pour_tous" class="citation-reponse">
+                    <span class="citation-nom">{{ msg.reponse_a_nom }}</span>
+                    <p class="citation-texte">{{ msg.reponse_a_texte }}</p>
+                  </div>
+
+                  <!-- Texte du message -->
+                  <p class="texte-message" [class.message-supprime-texte]="msg.supprime_pour_tous">
+                    {{ msg.texte }}
+                  </p>
+
+                  <!-- Métadonnées & Heure -->
+                  <div class="meta-message">
+                    <span *ngIf="msg.modifie && !msg.supprime_pour_tous" class="indicateur-modifie">(modifié)</span>
+                    <span class="heure-message">{{ formaterHeure(msg.created_at) }}</span>
+                    <span *ngIf="msg.expediteur_role === 'admin' && !msg.supprime_pour_tous" class="coches-lecture" [class.lues]="msg.lu">
+                      ✓✓
+                    </span>
+                  </div>
+
+                  <!-- Bouton déclencheur menu d'actions -->
+                  <button
+                    *ngIf="!msg.supprime_pour_tous"
+                    type="button"
+                    class="btn-message-options"
+                    (click)="$event.stopPropagation(); toggleMenuOptions(msg)"
+                    aria-label="Options"
+                  >
+                    ⌄
+                  </button>
+
+                  <!-- Menu déroulant interactif (Copier, Modifier, Supprimer, Répondre) -->
+                  <div *ngIf="menuOptionsMessageId === msg.id" class="menu-actions-message">
+                    <button type="button" (click)="repondreA(msg)">
+                      ↩️ Répondre
+                    </button>
+                    <button type="button" (click)="copierMessage(msg)">
+                      📋 Copier
+                    </button>
+                    <button *ngIf="msg.expediteur_role === 'admin'" type="button" (click)="commencerEdition(msg)">
+                      ✏️ Modifier
+                    </button>
+                    <button type="button" (click)="supprimerPourMoi(msg)">
+                      🗑️ Supprimer pour moi
+                    </button>
+                    <button *ngIf="msg.expediteur_role === 'admin'" type="button" class="btn-suppr-tous" (click)="supprimerPourTous(msg)">
+                      🚫 Supprimer pour nous deux
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
+          </div>
+
+          <!-- Bandeau de citation / réponse au-dessus du champ -->
+          <div *ngIf="messageEnReponse" class="bandeau-reponse">
+            <div class="bandeau-reponse-contenu">
+              <span class="reponse-nom">↩️ Répondre à {{ messageEnReponse.expediteur_role === 'admin' ? 'Vous' : (messageEnReponse.client_nom || 'Client') }}</span>
+              <p class="reponse-texte">{{ messageEnReponse.texte }}</p>
+            </div>
+            <button type="button" class="btn-fermer-action" (click)="annulerReponse()">✕</button>
+          </div>
+
+          <!-- Bandeau d'édition de message au-dessus du champ -->
+          <div *ngIf="messageEnEdition" class="bandeau-edition">
+            <div class="bandeau-edition-contenu">
+              <span class="edition-nom">✏️ Modification du message</span>
+              <p class="edition-texte">{{ messageEnEdition.texte }}</p>
+            </div>
+            <button type="button" class="btn-fermer-action" (click)="annulerEdition()">✕</button>
           </div>
 
           <!-- Formulaire de réponse -->
@@ -254,7 +324,7 @@
               type="text"
               [(ngModel)]="reponseAdmin"
               (keydown.enter)="envoyerReponseAdmin()"
-              [placeholder]="'chat.placeholder' | translate"
+              [placeholder]="messageEnEdition ? 'Modifier votre message...' : ('chat.placeholder' | translate)"
               class="input-admin-chat"
             />
             <button
@@ -263,7 +333,7 @@
               [disabled]="!reponseAdmin.trim()"
               class="btn-admin-envoyer"
             >
-              {{ 'chat.envoyer' | translate }}
+              {{ messageEnEdition ? 'Valider' : ('chat.envoyer' | translate) }}
             </button>
           </div>
         </ng-container>

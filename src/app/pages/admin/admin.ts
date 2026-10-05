@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ViewChild, ElementRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -79,19 +79,48 @@ export class Admin implements OnInit, OnDestroy {
   chargementChat = false;
   adminUserId: string | null = null;
 
-  private realtimeListener = (nouveauMsg: Message) => {
+  messageEnReponse: Message | null = null;
+  messageEnEdition: Message | null = null;
+  menuOptionsMessageId: number | null = null;
+
+  swipeMessageId: number | null = null;
+  swipeStartX = 0;
+  swipeDeltaX = 0;
+
+  @HostListener('document:click')
+  onDocumentClick() {
+    this.menuOptionsMessageId = null;
+  }
+
+  private realtimeListener = (nouveauMsg: Message, eventType: 'INSERT' | 'UPDATE' | 'DELETE' = 'INSERT') => {
     const concerneAdmin = !this.restaurantId || !nouveauMsg.restaurant_id || String(nouveauMsg.restaurant_id) === String(this.restaurantId);
     if (concerneAdmin) {
       this.chargerConversations();
       if (this.discussionActive && this.discussionActive.client_id === nouveauMsg.client_id) {
-        if (!this.messagesDiscussionActive.some(m => m.id === nouveauMsg.id)) {
-          this.messagesDiscussionActive.push(nouveauMsg);
-          const restId = this.restaurantId || (nouveauMsg.restaurant_id ? String(nouveauMsg.restaurant_id) : '1');
-          this.chatService.marquerCommeLus(restId, this.discussionActive.client_id, 'client');
-          this.defilerBasDiscussion();
+        if (eventType === 'DELETE') {
+          this.messagesDiscussionActive = this.messagesDiscussionActive.filter(m => m.id !== nouveauMsg.id);
+        } else if (eventType === 'UPDATE') {
+          const idx = this.messagesDiscussionActive.findIndex(m => m.id === nouveauMsg.id);
+          if (idx !== -1) {
+            if (this.adminUserId && nouveauMsg.supprime_par?.includes(this.adminUserId)) {
+              this.messagesDiscussionActive.splice(idx, 1);
+            } else {
+              this.messagesDiscussionActive[idx] = { ...this.messagesDiscussionActive[idx], ...nouveauMsg };
+            }
+          }
+        } else {
+          if (this.adminUserId && nouveauMsg.supprime_par?.includes(this.adminUserId)) {
+            return;
+          }
+          if (!this.messagesDiscussionActive.some(m => m.id === nouveauMsg.id)) {
+            this.messagesDiscussionActive.push(nouveauMsg);
+            const restId = this.restaurantId || (nouveauMsg.restaurant_id ? String(nouveauMsg.restaurant_id) : '1');
+            this.chatService.marquerCommeLus(restId, this.discussionActive.client_id, 'client');
+            this.defilerBasDiscussion();
+          }
         }
+        this.cdr.detectChanges();
       }
-      this.cdr.detectChanges();
     }
   };
 
@@ -153,6 +182,13 @@ export class Admin implements OnInit, OnDestroy {
       this.chargerReservations();
       this.chargerDemandesEvenement();
       await this.chargerConversations();
+
+      if (params['client_id']) {
+        const conv = this.conversations.find(c => c.client_id === params['client_id']);
+        if (conv) {
+          await this.selectionnerConversation(conv);
+        }
+      }
     });
 
     if (this.adminUserId) {
@@ -451,7 +487,10 @@ export class Admin implements OnInit, OnDestroy {
     this.discussionActive = conv;
     conv.non_lus = 0;
     this.chargementChat = true;
-    this.messagesDiscussionActive = await this.chatService.chargerMessages(this.restaurantId, conv.client_id);
+    this.messageEnReponse = null;
+    this.messageEnEdition = null;
+    this.menuOptionsMessageId = null;
+    this.messagesDiscussionActive = await this.chatService.chargerMessages(this.restaurantId, conv.client_id, this.adminUserId);
     const restId = this.restaurantId || (this.messagesDiscussionActive[0]?.restaurant_id ? String(this.messagesDiscussionActive[0].restaurant_id) : '1');
     await this.chatService.marquerCommeLus(restId, conv.client_id, 'client');
     this.chargementChat = false;
@@ -461,7 +500,7 @@ export class Admin implements OnInit, OnDestroy {
 
   async rafraichirDiscussionActive() {
     if (!this.discussionActive) return;
-    const derniers = await this.chatService.chargerMessages(this.restaurantId, this.discussionActive.client_id);
+    const derniers = await this.chatService.chargerMessages(this.restaurantId, this.discussionActive.client_id, this.adminUserId);
     if (
       derniers.length !== this.messagesDiscussionActive.length ||
       (derniers.length > 0 && derniers[derniers.length - 1].id !== this.messagesDiscussionActive[this.messagesDiscussionActive.length - 1]?.id)
@@ -474,15 +513,119 @@ export class Admin implements OnInit, OnDestroy {
     }
   }
 
+  toggleMenuOptions(msg: Message) {
+    this.menuOptionsMessageId = this.menuOptionsMessageId === msg.id ? null : (msg.id || null);
+  }
+
+  repondreA(msg: Message) {
+    this.messageEnReponse = msg;
+    this.messageEnEdition = null;
+    this.menuOptionsMessageId = null;
+  }
+
+  annulerReponse() {
+    this.messageEnReponse = null;
+  }
+
+  commencerEdition(msg: Message) {
+    this.messageEnEdition = msg;
+    this.messageEnReponse = null;
+    this.reponseAdmin = msg.texte;
+    this.menuOptionsMessageId = null;
+  }
+
+  annulerEdition() {
+    this.messageEnEdition = null;
+    this.reponseAdmin = '';
+  }
+
+  async copierMessage(msg: Message) {
+    this.menuOptionsMessageId = null;
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      await navigator.clipboard.writeText(msg.texte);
+      this.chatService.afficherToast('Resta', 'Message copié dans le presse-papier');
+    }
+  }
+
+  async supprimerPourMoi(msg: Message) {
+    this.menuOptionsMessageId = null;
+    if (!msg.id || !this.adminUserId) return;
+    await this.chatService.supprimerPourMoi(msg.id, this.adminUserId, msg.supprime_par);
+    this.messagesDiscussionActive = this.messagesDiscussionActive.filter(m => m.id !== msg.id);
+    this.cdr.detectChanges();
+  }
+
+  async supprimerPourTous(msg: Message) {
+    this.menuOptionsMessageId = null;
+    if (!msg.id) return;
+    if (!confirm('Supprimer ce message pour vous et le client ?')) return;
+    await this.chatService.supprimerPourTous(msg.id);
+    msg.supprime_pour_tous = true;
+    msg.texte = 'Ce message a été supprimé';
+    this.cdr.detectChanges();
+  }
+
+  onTouchStart(event: TouchEvent, msg: Message) {
+    this.swipeStartX = event.touches[0].clientX;
+    this.swipeMessageId = msg.id || null;
+    this.swipeDeltaX = 0;
+  }
+
+  onTouchMove(event: TouchEvent, msg: Message) {
+    if (this.swipeMessageId !== msg.id) return;
+    const currentX = event.touches[0].clientX;
+    const diff = currentX - this.swipeStartX;
+    if (diff > 0 && diff < 80) {
+      this.swipeDeltaX = diff;
+    }
+  }
+
+  onTouchEnd(_event: TouchEvent, msg: Message) {
+    if (this.swipeMessageId === msg.id && this.swipeDeltaX > 40) {
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        navigator.vibrate(25);
+      }
+      this.repondreA(msg);
+    }
+    this.swipeMessageId = null;
+    this.swipeDeltaX = 0;
+  }
+
+  getSwipeTransform(msg: Message): string {
+    if (this.swipeMessageId === msg.id && this.swipeDeltaX > 0) {
+      return `translateX(${this.swipeDeltaX}px)`;
+    }
+    return 'none';
+  }
+
   async envoyerReponseAdmin() {
     const texte = this.reponseAdmin.trim();
     if (!texte || !this.discussionActive || !this.adminUserId) {
       return;
     }
 
+    // 1. Mode modification de message
+    if (this.messageEnEdition && this.messageEnEdition.id) {
+      const msgId = this.messageEnEdition.id;
+      const succes = await this.chatService.modifierMessage(msgId, texte);
+      if (succes) {
+        this.messageEnEdition.texte = texte;
+        this.messageEnEdition.modifie = true;
+      }
+      this.messageEnEdition = null;
+      this.reponseAdmin = '';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    // 2. Mode envoi d'un nouveau message (avec ou sans réponse citée)
     const restId = this.restaurantId || (this.messagesDiscussionActive[0]?.restaurant_id ? String(this.messagesDiscussionActive[0].restaurant_id) : '1');
+    const reponseAId = this.messageEnReponse?.id || null;
+    const reponseANom = this.messageEnReponse ? (this.messageEnReponse.expediteur_role === 'admin' ? 'Resta' : (this.messageEnReponse.client_nom || 'Client')) : null;
+    const reponseATexte = this.messageEnReponse ? this.messageEnReponse.texte : null;
 
     this.reponseAdmin = '';
+    this.messageEnReponse = null;
 
     const messageEnvoye = await this.chatService.envoyerMessage({
       restaurantId: restId,
@@ -491,6 +634,9 @@ export class Admin implements OnInit, OnDestroy {
       expediteurId: this.adminUserId,
       expediteurRole: 'admin',
       texte,
+      reponseAId,
+      reponseANom,
+      reponseATexte,
     });
 
     if (messageEnvoye) {

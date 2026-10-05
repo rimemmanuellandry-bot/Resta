@@ -12,9 +12,16 @@
   <a *ngIf="!estConnecte" routerLink="/connexion" class="lien-connexion">{{ 'header.seConnecter' | translate }}</a>
 
   <div class="header-droite" *ngIf="estConnecte">
+    <!-- 1. Cloche Client (Réservations & Événements) -->
     <button *ngIf="!estAdmin" (click)="toggleNotifications()" class="btn-notif" aria-label="Notifications">
       🔔
       <span class="badge-notif" *ngIf="notificationsNonLues.length > 0">{{ notificationsNonLues.length }}</span>
+    </button>
+
+    <!-- 2. Cloche Admin (Nouveaux messages clients avec redirection vers le chat) -->
+    <button *ngIf="estAdmin" (click)="toggleNotificationsAdmin()" class="btn-notif btn-notif-admin" aria-label="Messages clients">
+      🔔
+      <span class="badge-notif" *ngIf="totalMessagesNonLusAdmin > 0">{{ totalMessagesNonLusAdmin }}</span>
     </button>
 
     <button (click)="toggleMenu()" class="btn-menu" aria-label="Menu">
@@ -23,6 +30,7 @@
   </div>
 </header>
 
+<!-- Overlay et Panneau Notifications Client -->
 <div class="notif-overlay" *ngIf="notificationsOuvertes" (click)="fermerNotifications()"></div>
 
 <div class="notif-panel" *ngIf="notificationsOuvertes">
@@ -31,14 +39,14 @@
   </div>
 
   <div class="notif-liste" *ngIf="notificationsNonLues.length > 0 || notificationsLues.length > 0; else notifVide">
-   <div class="notif-item" *ngFor="let notif of notificationsNonLues" (click)="marquerVue(notif)">
-  <span class="notif-texte">{{ libelleNotification(notif) }}</span>
-  <button class="notif-supprimer" (click)="supprimer(notif, $event)">✕</button>
-</div>
-<div class="notif-item notif-item-lue" *ngFor="let notif of notificationsLues">
-  <span class="notif-texte">{{ libelleNotification(notif) }}</span>
-  <button class="notif-supprimer" (click)="supprimer(notif, $event)">✕</button>
-</div>
+    <div class="notif-item" *ngFor="let notif of notificationsNonLues" (click)="marquerVue(notif)">
+      <span class="notif-texte">{{ libelleNotification(notif) }}</span>
+      <button class="notif-supprimer" (click)="supprimer(notif, $event)">✕</button>
+    </div>
+    <div class="notif-item notif-item-lue" *ngFor="let notif of notificationsLues">
+      <span class="notif-texte">{{ libelleNotification(notif) }}</span>
+      <button class="notif-supprimer" (click)="supprimer(notif, $event)">✕</button>
+    </div>
   </div>
 
   <ng-template #notifVide>
@@ -46,6 +54,42 @@
   </ng-template>
 </div>
 
+<!-- Overlay et Panneau Notifications Admin (Messages des clients) -->
+<div class="notif-overlay" *ngIf="notificationsAdminOuvertes" (click)="fermerNotificationsAdmin()"></div>
+
+<div class="notif-panel notif-panel-admin" *ngIf="notificationsAdminOuvertes">
+  <div class="notif-header">
+    <span>💬 Messages des clients</span>
+    <span class="badge-notif-admin-header" *ngIf="totalMessagesNonLusAdmin > 0">{{ totalMessagesNonLusAdmin }} non lu(s)</span>
+  </div>
+
+  <div class="notif-liste" *ngIf="conversationsAdmin.length > 0; else notifAdminVide">
+    <div
+      class="notif-item notif-item-admin"
+      *ngFor="let conv of conversationsAdmin"
+      [class.non-lu]="conv.non_lus > 0"
+      (click)="ouvrirConversationAdmin(conv)"
+    >
+      <div class="notif-admin-msg-row">
+        <div class="notif-admin-info">
+          <strong class="notif-client-nom">{{ conv.client_nom }}</strong>
+          <span class="notif-apercu">{{ conv.dernier_message }}</span>
+        </div>
+        <span class="badge-notif-conv" *ngIf="conv.non_lus > 0">{{ conv.non_lus }}</span>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #notifAdminVide>
+    <p class="notif-vide">{{ 'chat.aucunMessage' | translate }}</p>
+  </ng-template>
+
+  <button type="button" class="btn-acces-messagerie-admin" (click)="allerVersMessagerieAdmin()">
+    Ouvrir la messagerie Resta ↓
+  </button>
+</div>
+
+<!-- Menu Latéral -->
 <div class="menu-overlay" *ngIf="menuOuvert" (click)="fermerMenu()"></div>
 
 <nav class="menu-lateral" [class.ouvert]="menuOuvert">

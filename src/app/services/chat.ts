@@ -10,6 +10,12 @@ export interface Message {
   expediteur_role: 'client' | 'admin';
   texte: string;
   lu: boolean;
+  modifie?: boolean;
+  supprime_pour_tous?: boolean;
+  supprime_par?: string[];
+  reponse_a_id?: number | null;
+  reponse_a_nom?: string | null;
+  reponse_a_texte?: string | null;
   created_at?: string;
 }
 
@@ -30,6 +36,8 @@ export interface ToastNotification {
   client_id?: string;
 }
 
+export type RealtimeChatCallback = (msg: Message, eventType?: 'INSERT' | 'UPDATE' | 'DELETE') => void;
+
 @Injectable({
   providedIn: 'root'
 })
@@ -40,7 +48,7 @@ export class ChatService {
   private activeChannel: any = null;
   private currentUserId: string | null = null;
   private toastTimeout: any = null;
-  private listeners = new Set<(msg: Message) => void>();
+  private listeners = new Set<RealtimeChatCallback>();
 
   constructor() {
     this.demanderPermissionNotifications();
@@ -146,9 +154,9 @@ export class ChatService {
   }
 
   /**
-   * Initialise l'écoute temps réel Supabase Realtime pour un utilisateur
+   * Initialise l'écoute temps réel Supabase Realtime (INSERT, UPDATE, DELETE)
    */
-  initialiserRealtime(userId: string, onMessageRecu?: (msg: Message) => void) {
+  initialiserRealtime(userId: string, onMessageRecu?: RealtimeChatCallback) {
     this.currentUserId = userId;
     if (onMessageRecu) {
       this.listeners.add(onMessageRecu);
@@ -159,11 +167,13 @@ export class ChatService {
         .channel('resta-chat-channel')
         .on(
           'postgres_changes',
-          { event: 'INSERT', schema: 'public', table: 'messages' },
+          { event: '*', schema: 'public', table: 'messages' },
           payload => {
-            const msg = payload.new as Message;
-            // Si le message ne vient pas de moi
-            if (msg.expediteur_id !== this.currentUserId) {
+            const eventType = payload.eventType as 'INSERT' | 'UPDATE' | 'DELETE';
+            const msg = (eventType === 'DELETE' ? payload.old : payload.new) as Message;
+
+            // Notification toast sonore pour les nouveaux messages reçus
+            if (eventType === 'INSERT' && msg.expediteur_id !== this.currentUserId) {
               const titre = msg.expediteur_role === 'admin'
                 ? 'Resta (Restaurant)'
                 : (msg.client_nom || 'Nouveau client');
@@ -173,9 +183,10 @@ export class ChatService {
               });
               this.unreadCountTotal.update(v => v + 1);
             }
+
             this.listeners.forEach(cb => {
               try {
-                cb(msg);
+                cb(msg, eventType);
               } catch (e) {
                 console.error('Erreur listener Realtime chat :', e);
               }
@@ -186,7 +197,7 @@ export class ChatService {
     }
   }
 
-  retirerListener(onMessageRecu: (msg: Message) => void) {
+  retirerListener(onMessageRecu: RealtimeChatCallback) {
     this.listeners.delete(onMessageRecu);
   }
 
@@ -198,7 +209,7 @@ export class ChatService {
     }
   }
 
-  async chargerMessages(restaurantId: string | null | undefined, clientId: string): Promise<Message[]> {
+  async chargerMessages(restaurantId: string | null | undefined, clientId: string, currentUserId?: string | null): Promise<Message[]> {
     let query = supabase
       .from('messages')
       .select('*')
@@ -227,7 +238,13 @@ export class ChatService {
       console.warn('Erreur chargement messages :', error);
       return [];
     }
-    return (data || []) as Message[];
+
+    let res = (data || []) as Message[];
+    // Masquer les messages supprimés pour moi
+    if (currentUserId) {
+      res = res.filter(m => !m.supprime_par || !m.supprime_par.includes(currentUserId));
+    }
+    return res;
   }
 
   async envoyerMessage(params: {
@@ -237,8 +254,11 @@ export class ChatService {
     expediteurId: string;
     expediteurRole: 'client' | 'admin';
     texte: string;
+    reponseAId?: number | null;
+    reponseANom?: string | null;
+    reponseATexte?: string | null;
   }): Promise<Message | null> {
-    const payload = {
+    const payload: any = {
       restaurant_id: params.restaurantId,
       client_id: params.clientId,
       client_nom: params.clientNom,
@@ -246,6 +266,9 @@ export class ChatService {
       expediteur_role: params.expediteurRole,
       texte: params.texte.trim(),
       lu: false,
+      reponse_a_id: params.reponseAId || null,
+      reponse_a_nom: params.reponseANom || null,
+      reponse_a_texte: params.reponseATexte || null,
     };
 
     const { data, error } = await supabase
@@ -260,6 +283,54 @@ export class ChatService {
     }
 
     return data as Message;
+  }
+
+  async modifierMessage(messageId: number, nouveauTexte: string): Promise<boolean> {
+    const { error } = await supabase
+      .from('messages')
+      .update({
+        texte: nouveauTexte.trim(),
+        modifie: true,
+      })
+      .eq('id', messageId);
+
+    if (error) {
+      console.error('Erreur modification message :', error);
+      return false;
+    }
+    return true;
+  }
+
+  async supprimerPourTous(messageId: number): Promise<boolean> {
+    const { error } = await supabase
+      .from('messages')
+      .update({
+        supprime_pour_tous: true,
+        texte: 'Ce message a été supprimé',
+      })
+      .eq('id', messageId);
+
+    if (error) {
+      console.error('Erreur suppression message pour tous :', error);
+      return false;
+    }
+    return true;
+  }
+
+  async supprimerPourMoi(messageId: number, userId: string, supprimeParActuel: string[] = []): Promise<boolean> {
+    const updated = Array.from(new Set([...supprimeParActuel, userId]));
+    const { error } = await supabase
+      .from('messages')
+      .update({
+        supprime_par: updated,
+      })
+      .eq('id', messageId);
+
+    if (error) {
+      console.error('Erreur suppression message pour moi :', error);
+      return false;
+    }
+    return true;
   }
 
   async marquerCommeLus(restaurantId: string | null | undefined, clientId: string, expediteurRoleAEffacer: 'client' | 'admin') {
@@ -312,7 +383,7 @@ export class ChatService {
         conversationsMap.set(msg.client_id, {
           client_id: msg.client_id,
           client_nom: msg.client_nom || 'Client',
-          dernier_message: msg.texte,
+          dernier_message: msg.supprime_pour_tous ? '🚫 Ce message a été supprimé' : msg.texte,
           dernier_date: msg.created_at || new Date().toISOString(),
           non_lus: (!msg.lu && msg.expediteur_role === 'client') ? 1 : 0,
         });

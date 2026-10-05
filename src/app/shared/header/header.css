@@ -385,3 +385,84 @@
   justify-content: center;
   padding: 0 2px;
 }
+
+/* Notifications messages Admin */
+.notif-panel-admin {
+  width: 320px;
+}
+
+.badge-notif-admin-header {
+  background: #1a3c2e;
+  color: #d4af37;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 12px;
+  border: 1px solid #d4af37;
+}
+
+.notif-item-admin {
+  cursor: pointer;
+}
+
+.notif-item-admin.non-lu {
+  background: #fdf8ec;
+  border-left: 3px solid #d4af37;
+}
+
+.notif-admin-msg-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 10px;
+}
+
+.notif-admin-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.notif-client-nom {
+  font-size: 0.85rem;
+  color: #1a3c2e;
+}
+
+.notif-apercu {
+  font-size: 0.75rem;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 210px;
+}
+
+.badge-notif-conv {
+  background: #d4af37;
+  color: #1a3c2e;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.btn-acces-messagerie-admin {
+  width: 100%;
+  padding: 11px;
+  background: #1a3c2e;
+  color: #ffffff;
+  border: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-top: 1px solid #ebdcb2;
+  transition: background 0.15s;
+}
+
+.btn-acces-messagerie-admin:hover {
+  background: #234f3d;
+  color: #d4af37;
+}
