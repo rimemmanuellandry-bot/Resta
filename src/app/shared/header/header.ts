@@ -54,6 +54,13 @@ export class Header implements OnInit, OnDestroy {
   ngOnInit() {
     this.majAffichageRetour(this.location.path());
 
+    // Initialiser et synchroniser la langue avec TranslateService et le téléphone
+    this.langueActuelle = this.translate.currentLang() || (typeof localStorage !== 'undefined' ? localStorage.getItem('resta_langue') : null) || 'fr';
+    this.translate.onLangChange.subscribe(e => {
+      this.langueActuelle = e.lang;
+      this.cdr.detectChanges();
+    });
+
     this.router.events
       .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
       .subscribe(e => {
@@ -205,6 +212,9 @@ export class Header implements OnInit, OnDestroy {
 
   changerLangue(langue: string) {
     this.langueActuelle = langue;
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('resta_langue', langue);
+    }
     this.translate.use(langue);
   }
 

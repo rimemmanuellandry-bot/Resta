@@ -99,10 +99,18 @@ export class ChatWidget implements OnInit, OnDestroy {
     this.routerSub = this.router.events
       .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
       .subscribe(e => {
-        this.determinerVisibilite(e.urlAfterRedirects || e.url);
+        const urlActive = e.urlAfterRedirects || e.url;
+        this.determinerVisibilite(urlActive);
+        if (urlActive.includes('chat=ouvert')) {
+          setTimeout(() => this.ouvrirDepuisToast(), 250);
+        }
       });
 
     await this.verifierUtilisateur();
+
+    if (typeof window !== 'undefined' && window.location.search.includes('chat=ouvert')) {
+      setTimeout(() => this.ouvrirDepuisToast(), 400);
+    }
 
     supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session) {

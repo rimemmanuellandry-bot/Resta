@@ -49,17 +49,42 @@ export class ChatService {
   private currentUserId: string | null = null;
   private toastTimeout: any = null;
   private listeners = new Set<RealtimeChatCallback>();
+  private swRegistration: ServiceWorkerRegistration | null = null;
 
   constructor() {
     this.demanderPermissionNotifications();
   }
 
-  demanderPermissionNotifications() {
-    if (typeof window !== 'undefined' && 'Notification' in window) {
-      if (Notification.permission === 'default') {
-        Notification.requestPermission().catch(() => {});
+  /**
+   * Enregistre le service worker et demande la permission pour les notifications dans la barre du téléphone
+   */
+  async demanderPermissionNotifications(): Promise<boolean> {
+    if (typeof window === 'undefined') {
+      return false;
+    }
+
+    // 1. Enregistrement du Service Worker Resta (indispensable pour la barre de notification mobile)
+    if ('serviceWorker' in navigator) {
+      try {
+        this.swRegistration = await navigator.serviceWorker.register('/resta-sw.js', { scope: '/' });
+      } catch (err) {
+        console.warn('Enregistrement Service Worker Resta :', err);
       }
     }
+
+    // 2. Demande d'autorisation de notification au système / téléphone
+    if ('Notification' in window) {
+      try {
+        let perm = Notification.permission;
+        if (perm === 'default') {
+          perm = await Notification.requestPermission();
+        }
+        return perm === 'granted';
+      } catch {
+        return false;
+      }
+    }
+    return false;
   }
 
   /**
@@ -113,9 +138,74 @@ export class ChatService {
   }
 
   /**
-   * Affiche la bannière flottante de notification Resta
+   * Affiche la notification dans la barre d'état du téléphone portable (Android / PWA)
    */
-  afficherToast(titre: string, message: string, meta?: { restaurant_id?: string; client_id?: string }) {
+  async afficherNotificationSysteme(
+    titre: string,
+    message: string,
+    meta?: { restaurant_id?: string; client_id?: string; role?: 'client' | 'admin' }
+  ) {
+    if (typeof window === 'undefined' || !('Notification' in window)) {
+      return;
+    }
+    if (Notification.permission !== 'granted') {
+      return;
+    }
+
+    // Déterminer l'URL cible selon le rôle du destinataire
+    let urlCible = '/bienvenue?chat=ouvert';
+    if (meta?.role === 'admin' || (!meta?.role && meta?.client_id && meta?.restaurant_id)) {
+      urlCible = `/admin?restaurant_id=${meta.restaurant_id}&client_id=${meta.client_id}&section=messagerie`;
+    }
+
+    const options: any = {
+      body: message,
+      icon: '/icons/icon-192x192.png',
+      badge: '/icons/icon-72x72.png',
+      tag: meta?.client_id ? `resta-msg-${meta.client_id}` : `resta-msg-${Date.now()}`,
+      renotify: true,
+      vibrate: [200, 100, 200],
+      data: {
+        url: urlCible,
+        date: Date.now(),
+      },
+    };
+
+    // 1. Méthode Service Worker : Indispensable sur mobile Android pour apparaître dans la barre de notifications
+    try {
+      if ('serviceWorker' in navigator) {
+        const reg = this.swRegistration || (await navigator.serviceWorker.ready) || (await navigator.serviceWorker.getRegistration());
+        if (reg && reg.showNotification) {
+          await reg.showNotification(titre, options);
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn('ServiceWorker showNotification fallback :', e);
+    }
+
+    // 2. Fallback pour navigateurs Desktop classiques
+    try {
+      const notif = new Notification(titre, options);
+      notif.onclick = () => {
+        window.focus();
+        if (typeof window !== 'undefined' && urlCible) {
+          window.location.href = urlCible;
+        }
+      };
+    } catch (e) {
+      console.warn('Notification classique impossible :', e);
+    }
+  }
+
+  /**
+   * Affiche la bannière flottante in-app + notification dans la barre du smartphone + vibration
+   */
+  afficherToast(
+    titre: string,
+    message: string,
+    meta?: { restaurant_id?: string; client_id?: string; role?: 'client' | 'admin' }
+  ) {
     if (this.toastTimeout) {
       clearTimeout(this.toastTimeout);
     }
@@ -132,17 +222,15 @@ export class ChatService {
     this.notificationToast.set(toast);
     this.jouerSonNotification();
 
-    // Notification système navigateur si en arrière-plan
-    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+    // Faire vibrer physiquement le smartphone si supporté
+    if (typeof window !== 'undefined' && 'vibrate' in navigator) {
       try {
-        new Notification(titre, {
-          body: message,
-          icon: '/icons/icon-192x192.png',
-        });
-      } catch {
-        // Ignorer si indisponible
-      }
+        navigator.vibrate([200, 100, 200]);
+      } catch {}
     }
+
+    // Notification système dans la barre du téléphone
+    this.afficherNotificationSysteme(titre, message, meta);
 
     this.toastTimeout = setTimeout(() => {
       this.fermerToast();
@@ -180,6 +268,7 @@ export class ChatService {
               this.afficherToast(titre, msg.texte, {
                 restaurant_id: String(msg.restaurant_id),
                 client_id: msg.client_id,
+                role: msg.expediteur_role === 'client' ? 'admin' : 'client',
               });
               this.unreadCountTotal.update(v => v + 1);
             }
