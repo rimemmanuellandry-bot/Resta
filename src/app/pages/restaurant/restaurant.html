@@ -1,13 +1,58 @@
 <div class="restaurant-container">
-  <h2>{{ 'restaurant.titre' | translate: { localite: localite } }}</h2>
+  <div class="restaurant-en-tete">
+    <h2>
+      {{ (modeGps ? 'restaurant.titreGps' : 'restaurant.titre') | translate: { localite: localite } }}
+    </h2>
+
+    <!-- Bouton pour trier par GPS si pas encore fait -->
+    <button
+      *ngIf="!modeGps"
+      type="button"
+      class="btn-tri-gps"
+      (click)="activerTriGps()"
+      [disabled]="chargementGps"
+    >
+      <span class="icone-gps-mini" [class.tourner]="chargementGps">📍</span>
+      {{ (chargementGps ? 'localite.gpsEnCours' : 'restaurant.trierParGps') | translate }}
+    </button>
+
+    <div *ngIf="erreurGps" class="alerte-gps-restau">
+      {{ erreurGps | translate }}
+    </div>
+
+    <!-- Lien retour vers choix localité -->
+    <a
+      [routerLink]="['/localite']"
+      [queryParams]="intention ? { intention: intention } : {}"
+      class="lien-changer-ville"
+    >
+      ← {{ 'restaurant.changerVille' | translate }}
+    </a>
+  </div>
 
   <p *ngIf="!chargementTermine" class="chargement">{{ 'restaurant.chargement' | translate }}</p>
 
   <div class="restaurant-liste" *ngIf="chargementTermine">
-    <div class="restaurant-card" *ngFor="let restaurant of restaurants" (click)="choisirRestaurant(restaurant)">
-      <h3>{{ restaurant.nom }}</h3>
-      <p>{{ restaurant.adresse }}</p>
+    <div
+      class="restaurant-card"
+      *ngFor="let restaurant of restaurants"
+      (click)="choisirRestaurant(restaurant)"
+    >
+      <div class="card-header-ligne">
+        <h3>{{ restaurant.nom }}</h3>
+        <!-- Badge de proximité GPS Resta (Or & Vert forêt) -->
+        <span class="badge-distance" *ngIf="restaurant.distanceAffichee">
+          📍 {{ 'restaurant.distance' | translate: { distance: restaurant.distanceAffichee } }}
+        </span>
+      </div>
+
+      <p class="restaurant-adresse">{{ restaurant.adresse }} <span *ngIf="restaurant.localite">({{ restaurant.localite }})</span></p>
+
+      <div class="card-action-ligne">
+        <span class="badge-choisir">Choisir ce restaurant →</span>
+      </div>
     </div>
+
     <p *ngIf="restaurants.length === 0" class="vide">{{ 'restaurant.aucunResultat' | translate }}</p>
   </div>
 </div>

@@ -210,7 +210,11 @@
   },
   "localite": {
     "titre": "Where are you?",
-    "sousTitre": "Choose your city to see partner restaurants",
+    "sousTitre": "Choose your city or find restaurants around you",
+    "boutonGps": "Restaurants near me (GPS)",
+    "gpsEnCours": "Searching your GPS position...",
+    "ouSeparateur": "or choose your city",
+    "erreurGps": "Unable to access your GPS position. Please check that geolocation is allowed in your browser or select your city below.",
     "chargement": "Loading...",
     "aucuneLocalite": "No location available at the moment."
   },
@@ -248,8 +252,13 @@
   },
   "restaurant": {
     "titre": "Restaurants in {{localite}}",
+    "titreGps": "Restaurants closest to you",
+    "trierParGps": "Sort by GPS proximity",
+    "distance": "{{distance}} away",
+    "changerVille": "Change city / location",
+    "erreurGps": "Unable to obtain your GPS position. Enable location in your browser.",
     "chargement": "Loading...",
-    "aucunResultat": "No restaurant available in this area."
+    "aucunResultat": "No restaurant available at the moment."
   },
   "facture": {
     "titreDocument": "Resta - Invoice",

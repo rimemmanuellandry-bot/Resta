@@ -2,6 +2,29 @@
   <h2>{{ 'localite.titre' | translate }}</h2>
   <p>{{ 'localite.sousTitre' | translate }}</p>
 
+  <!-- 1. Bouton GPS Proximité Resta -->
+  <div class="gps-section">
+    <button
+      type="button"
+      class="btn-gps"
+      (click)="localiserGps()"
+      [disabled]="gpsEnCours"
+    >
+      <span class="icone-gps" [class.tourner]="gpsEnCours">📍</span>
+      <span class="texte-gps">
+        {{ (gpsEnCours ? 'localite.gpsEnCours' : 'localite.boutonGps') | translate }}
+      </span>
+    </button>
+
+    <div *ngIf="erreurGps" class="alerte-gps">
+      {{ erreurGps | translate }}
+    </div>
+  </div>
+
+  <div class="separateur-localite">
+    <span>{{ 'localite.ouSeparateur' | translate }}</span>
+  </div>
+
   <p *ngIf="!chargementTermine" class="chargement">{{ 'localite.chargement' | translate }}</p>
 
   <div class="localite-liste" *ngIf="chargementTermine">
