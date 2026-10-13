@@ -1,9 +1,136 @@
-<div class="admin-container">
-  <button [routerLink]="['/statistiques']" [queryParams]="{ restaurant_id: restaurantId }" class="btn-voir-stats">
-    {{ 'admin.voirChiffreAffaires' | translate }}
-  </button>
+<!-- 1. HUB ADMINISTRATEUR (Même disposition que la page Bienvenue) -->
+<div class="accueil-container admin-hub-container" *ngIf="sectionActive === 'hub'">
+  <div class="logo-header">
+    <img src="icons/icon-192x192.png" alt="Resta" class="logo-icone" />
+  </div>
+  <h1>{{ 'admin.titreHub' | translate }}</h1>
+  <p>{{ 'admin.sousTitreHub' | translate }}</p>
 
-  <h2>{{ 'admin.commandes.titre' | translate }}</h2>
+  <div class="hub-boutons-liste">
+    <!-- 1. Gestion des commandes -->
+    <button type="button" class="btn-hub-item" (click)="changerSection('commandes')">
+      <span class="hub-icone">🧾</span>
+      <span class="hub-texte">{{ 'admin.hub.commandes' | translate }}</span>
+      <span class="hub-badge" *ngIf="nbCommandesEnCours > 0">{{ nbCommandesEnCours }}</span>
+    </button>
+
+    <!-- 2. Gestion des réservations -->
+    <button type="button" class="btn-hub-item" (click)="changerSection('reservations')">
+      <span class="hub-icone">📅</span>
+      <span class="hub-texte">{{ 'admin.hub.reservations' | translate }}</span>
+      <span class="hub-badge" *ngIf="nbReservationsEnAttente > 0">{{ nbReservationsEnAttente }}</span>
+    </button>
+
+    <!-- 3. Gestion des menus -->
+    <button type="button" class="btn-hub-item" (click)="changerSection('menu')">
+      <span class="hub-icone">🍽️</span>
+      <span class="hub-texte">{{ 'admin.hub.menu' | translate }}</span>
+      <span class="hub-badge-neutre" *ngIf="plats.length > 0">{{ plats.length }}</span>
+    </button>
+
+    <!-- 4. Gestion de privatiser la salle -->
+    <button type="button" class="btn-hub-item" (click)="changerSection('evenements')">
+      <span class="hub-icone">🎉</span>
+      <span class="hub-texte">{{ 'admin.hub.evenements' | translate }}</span>
+      <span class="hub-badge" *ngIf="nbEvenementsEnAttente > 0">{{ nbEvenementsEnAttente }}</span>
+    </button>
+
+    <!-- 5. Statistique -->
+    <button type="button" class="btn-hub-item btn-hub-stat" [routerLink]="['/statistiques']" [queryParams]="{ restaurant_id: restaurantId }">
+      <span class="hub-icone">📊</span>
+      <span class="hub-texte">{{ 'admin.hub.statistiques' | translate }}</span>
+    </button>
+
+    <!-- 6. Messagerie -->
+    <button type="button" class="btn-hub-item" (click)="changerSection('messagerie')">
+      <span class="hub-icone">💬</span>
+      <span class="hub-texte">{{ 'admin.hub.messagerie' | translate }}</span>
+      <span class="hub-badge hub-badge-or" *ngIf="totalMessagesNonLus > 0">{{ totalMessagesNonLus }}</span>
+    </button>
+  </div>
+</div>
+
+<!-- 2. VUE DÉTAILLÉE D'UNE SECTION ADMINISTRATIVE -->
+<div class="admin-container" *ngIf="sectionActive !== 'hub'">
+  <!-- Barre de navigation supérieure (Bouton retour + Onglets rapides) -->
+  <div class="admin-nav-bar">
+    <button type="button" class="btn-retour-hub" (click)="changerSection('hub')">
+      ← {{ 'admin.retourHub' | translate }}
+    </button>
+
+    <div class="admin-nav-onglets">
+      <button
+        type="button"
+        class="onglet-btn"
+        [class.actif]="sectionActive === 'commandes'"
+        (click)="changerSection('commandes')"
+      >
+        🧾 {{ 'admin.hub.commandes' | translate }}
+        <span class="onglet-badge" *ngIf="nbCommandesEnCours > 0">{{ nbCommandesEnCours }}</span>
+      </button>
+
+      <button
+        type="button"
+        class="onglet-btn"
+        [class.actif]="sectionActive === 'reservations'"
+        (click)="changerSection('reservations')"
+      >
+        📅 {{ 'admin.hub.reservations' | translate }}
+        <span class="onglet-badge" *ngIf="nbReservationsEnAttente > 0">{{ nbReservationsEnAttente }}</span>
+      </button>
+
+      <button
+        type="button"
+        class="onglet-btn"
+        [class.actif]="sectionActive === 'menu'"
+        (click)="changerSection('menu')"
+      >
+        🍽️ {{ 'admin.hub.menu' | translate }}
+      </button>
+
+      <button
+        type="button"
+        class="onglet-btn"
+        [class.actif]="sectionActive === 'evenements'"
+        (click)="changerSection('evenements')"
+      >
+        🎉 {{ 'admin.hub.evenements' | translate }}
+        <span class="onglet-badge" *ngIf="nbEvenementsEnAttente > 0">{{ nbEvenementsEnAttente }}</span>
+      </button>
+
+      <a
+        [routerLink]="['/statistiques']"
+        [queryParams]="{ restaurant_id: restaurantId }"
+        class="onglet-btn onglet-lien-stat"
+      >
+        📊 {{ 'admin.hub.statistiques' | translate }}
+      </a>
+
+      <button
+        type="button"
+        class="onglet-btn"
+        [class.actif]="sectionActive === 'messagerie'"
+        (click)="changerSection('messagerie')"
+      >
+        💬 {{ 'admin.hub.messagerie' | translate }}
+        <span class="onglet-badge onglet-badge-or" *ngIf="totalMessagesNonLus > 0">{{ totalMessagesNonLus }}</span>
+      </button>
+
+      <button
+        type="button"
+        class="onglet-btn onglet-tous"
+        [class.actif]="sectionActive === 'tous'"
+        (click)="changerSection('tous')"
+        [title]="'admin.toutAfficher' | translate"
+      >
+        📋 {{ 'admin.toutAfficher' | translate }}
+      </button>
+    </div>
+  </div>
+
+  <!-- SECTION 1 : GESTION DES COMMANDES -->
+  <section class="admin-section-bloc gestion-commandes" *ngIf="sectionActive === 'commandes' || sectionActive === 'tous'">
+    <h2>{{ 'admin.commandes.titre' | translate }}</h2>
 
   <div *ngFor="let commande of commandes" class="commande-card">
     <div class="commande-header">
@@ -34,8 +161,10 @@
   </div>
 
   <p *ngIf="commandes.length === 0" class="rien">{{ 'admin.commandes.aucune' | translate }}</p>
+  </section>
 
-  <section class="gestion-reservations">
+  <!-- SECTION 2 : GESTION DES RÉSERVATIONS -->
+  <section class="admin-section-bloc gestion-reservations" *ngIf="sectionActive === 'reservations' || sectionActive === 'tous'">
     <h2>{{ 'admin.reservations.titre' | translate }}</h2>
 
     <div *ngFor="let reservation of reservations" class="reservation-card">
@@ -74,7 +203,8 @@
     <p *ngIf="reservations.length === 0" class="Aucune">{{ 'admin.reservations.aucune' | translate }}</p>
   </section>
 
-  <section class="gestion-evenements">
+  <!-- SECTION 3 : GESTION DE PRIVATISER LA SALLE -->
+  <section class="admin-section-bloc gestion-evenements" *ngIf="sectionActive === 'evenements' || sectionActive === 'tous'">
     <h2>{{ 'admin.evenements.titre' | translate }}</h2>
 
     <div *ngFor="let demande of demandesEvenement" class="reservation-card">
@@ -119,7 +249,8 @@
     <p *ngIf="demandesEvenement.length === 0" class="Aucune">{{ 'admin.evenements.aucune' | translate }}</p>
   </section>
 
-  <section class="gestion-menu">
+  <!-- SECTION 4 : GESTION DES MENUS -->
+  <section class="admin-section-bloc gestion-menu" *ngIf="sectionActive === 'menu' || sectionActive === 'tous'">
     <h2>{{ 'admin.menu.titre' | translate }}</h2>
 
     <form (ngSubmit)="validerPlat()" class="form-plat">
@@ -174,7 +305,8 @@
     <p *ngIf="plats.length === 0" class="Aucune">{{ 'admin.menu.aucunPlat' | translate }}</p>
   </section>
 
-  <section id="section-messagerie" class="gestion-messagerie">
+  <!-- SECTION 5 : MESSAGERIE RESTA DIRECT -->
+  <section id="section-messagerie" class="admin-section-bloc gestion-messagerie" *ngIf="sectionActive === 'messagerie' || sectionActive === 'tous'">
     <h2>💬 {{ 'chat.discussionsTitre' | translate }}</h2>
 
     <div class="resta-admin-chat-wrapper">

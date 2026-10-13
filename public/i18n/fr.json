@@ -141,6 +141,18 @@
     "telechargerFacture": "Télécharger la facture"
   },
   "admin": {
+    "titreHub": "Espace Administrateur",
+    "sousTitreHub": "Que souhaitez-vous gérer aujourd'hui ?",
+    "retourHub": "Retour au menu principal",
+    "toutAfficher": "Tout afficher",
+    "hub": {
+      "commandes": "Gestion des commandes",
+      "reservations": "Gestion des réservations",
+      "menu": "Gestion des menus",
+      "evenements": "Gestion de privatiser la salle",
+      "statistiques": "Statistiques",
+      "messagerie": "Messagerie"
+    },
     "voirChiffreAffaires": "Voir le chiffre d'affaires",
     "commandes": {
       "titre": "Commandes en cours",

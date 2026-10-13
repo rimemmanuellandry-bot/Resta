@@ -125,6 +125,18 @@
     "telechargerFacture": "Download invoice"
   },
   "admin": {
+    "titreHub": "Admin Dashboard",
+    "sousTitreHub": "What would you like to manage today?",
+    "retourHub": "Back to main menu",
+    "toutAfficher": "Show all",
+    "hub": {
+      "commandes": "Order Management",
+      "reservations": "Reservation Management",
+      "menu": "Menu Management",
+      "evenements": "Private Event Management",
+      "statistiques": "Statistics",
+      "messagerie": "Messaging"
+    },
     "voirChiffreAffaires": "View revenue",
     "commandes": {
       "titre": "Current orders",

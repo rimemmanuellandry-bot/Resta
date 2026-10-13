@@ -142,7 +142,8 @@ export class Header implements OnInit, OnDestroy {
     this.router.navigate(['/admin'], {
       queryParams: {
         restaurant_id: this.restaurantId,
-        client_id: conv.client_id
+        client_id: conv.client_id,
+        section: 'messagerie'
       }
     }).then(() => {
       setTimeout(() => {
@@ -157,7 +158,10 @@ export class Header implements OnInit, OnDestroy {
   allerVersMessagerieAdmin() {
     this.notificationsAdminOuvertes = false;
     this.router.navigate(['/admin'], {
-      queryParams: { restaurant_id: this.restaurantId }
+      queryParams: {
+        restaurant_id: this.restaurantId,
+        section: 'messagerie'
+      }
     }).then(() => {
       setTimeout(() => {
         const el = document.getElementById('section-messagerie');

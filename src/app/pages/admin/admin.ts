@@ -78,6 +78,23 @@ export class Admin implements OnInit, OnDestroy {
   reponseAdmin = '';
   chargementChat = false;
   adminUserId: string | null = null;
+  sectionActive: 'hub' | 'commandes' | 'reservations' | 'menu' | 'evenements' | 'messagerie' | 'tous' = 'hub';
+
+  get nbCommandesEnCours(): number {
+    return this.commandes.filter(c => c.statut !== 'servie' && c.statut !== 'livrée').length;
+  }
+
+  get nbReservationsEnAttente(): number {
+    return this.reservations.filter(r => r.statut === 'en_attente').length;
+  }
+
+  get nbEvenementsEnAttente(): number {
+    return this.demandesEvenement.filter(d => d.statut === 'en_attente').length;
+  }
+
+  get totalMessagesNonLus(): number {
+    return this.conversations.reduce((acc, c) => acc + (c.non_lus || 0), 0);
+  }
 
   messageEnReponse: Message | null = null;
   messageEnEdition: Message | null = null;
@@ -183,7 +200,12 @@ export class Admin implements OnInit, OnDestroy {
       this.chargerDemandesEvenement();
       await this.chargerConversations();
 
+      if (params['section']) {
+        this.sectionActive = params['section'];
+      }
+
       if (params['client_id']) {
+        this.sectionActive = 'messagerie';
         const conv = this.conversations.find(c => c.client_id === params['client_id']);
         if (conv) {
           await this.selectionnerConversation(conv);
@@ -647,6 +669,17 @@ export class Admin implements OnInit, OnDestroy {
       this.cdr.detectChanges();
       this.defilerBasDiscussion();
     }
+  }
+
+  changerSection(section: 'hub' | 'commandes' | 'reservations' | 'menu' | 'evenements' | 'messagerie' | 'tous') {
+    this.sectionActive = section;
+    if (section === 'messagerie') {
+      this.defilerBasDiscussion();
+    }
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    this.cdr.detectChanges();
   }
 
   formaterHeure(dateIso?: string): string {
