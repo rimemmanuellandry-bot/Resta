@@ -6,6 +6,16 @@
   <h1>{{ 'admin.titreHub' | translate }}</h1>
   <p>{{ 'admin.sousTitreHub' | translate }}</p>
 
+  <!-- Sélecteur d'établissement multi-restaurants Resta -->
+  <div class="selecteur-resto-hub" *ngIf="restaurantsDisponibles.length > 1">
+    <label for="hub-resto-select" class="label-resto-hub">🏪 Restaurant géré :</label>
+    <select id="hub-resto-select" [ngModel]="restaurantId" (ngModelChange)="changerRestaurantSelectionne($event)" class="select-resto-hub-input">
+      <option *ngFor="let r of restaurantsDisponibles" [value]="r.id">
+        {{ r.nom }} ({{ r.localite }})
+      </option>
+    </select>
+  </div>
+
   <div class="hub-boutons-liste">
     <!-- 1. Gestion des commandes -->
     <button type="button" class="btn-hub-item" (click)="changerSection('commandes')">
@@ -57,6 +67,14 @@
     <button type="button" class="btn-retour-hub" (click)="changerSection('hub')">
       ← {{ 'admin.retourHub' | translate }}
     </button>
+
+    <div class="admin-resto-nav-badge" *ngIf="restaurantsDisponibles.length > 1">
+      <select [ngModel]="restaurantId" (ngModelChange)="changerRestaurantSelectionne($event)" class="select-resto-nav-input">
+        <option *ngFor="let r of restaurantsDisponibles" [value]="r.id">
+          📍 {{ r.nom }}
+        </option>
+      </select>
+    </div>
 
     <div class="admin-nav-onglets">
       <button

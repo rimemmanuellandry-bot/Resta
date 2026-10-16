@@ -39,8 +39,56 @@
 .admin-hub-container p {
   color: #f7f5f0;
   font-size: 1.05rem;
-  margin: 0 0 32px;
+  margin: 0 0 24px;
   text-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
+}
+
+.selecteur-resto-hub {
+  margin: 0 auto 24px;
+  background: rgba(26, 60, 46, 0.9);
+  border: 1.5px solid #d4af37;
+  padding: 10px 20px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(8px);
+}
+
+.label-resto-hub {
+  color: #d4af37;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.select-resto-hub-input {
+  background: #122b21;
+  color: #ffffff;
+  border: 1px solid #d4af37;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  outline: none;
+}
+
+.admin-resto-nav-badge {
+  display: flex;
+  align-items: center;
+}
+
+.select-resto-nav-input {
+  background: #1a3c2e;
+  color: #d4af37;
+  border: 1px solid #d4af37;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  outline: none;
 }
 
 .hub-boutons-liste {

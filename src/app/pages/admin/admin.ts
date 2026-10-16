@@ -79,6 +79,12 @@ export class Admin implements OnInit, OnDestroy {
   chargementChat = false;
   adminUserId: string | null = null;
   sectionActive: 'hub' | 'commandes' | 'reservations' | 'menu' | 'evenements' | 'messagerie' | 'tous' = 'hub';
+  restaurantsDisponibles: { id: number; nom: string; localite: string }[] = [];
+
+  get nomRestaurantActuel(): string {
+    const r = this.restaurantsDisponibles.find(resto => String(resto.id) === String(this.restaurantId));
+    return r ? `${r.nom} (${r.localite})` : 'Restaurant actif';
+  }
 
   get nbCommandesEnCours(): number {
     return this.commandes.filter(c => c.statut !== 'servie' && c.statut !== 'livrée').length;
@@ -150,6 +156,14 @@ export class Admin implements OnInit, OnDestroy {
   ) {}
 
   async ngOnInit() {
+    const { data: listeRestos } = await supabase
+      .from('restaurants')
+      .select('id, nom, localite')
+      .order('id', { ascending: true });
+    if (listeRestos && listeRestos.length > 0) {
+      this.restaurantsDisponibles = listeRestos;
+    }
+
     const { data: { session } } = await supabase.auth.getSession();
     let adminRestaurantId: string | null = null;
 
@@ -167,14 +181,18 @@ export class Admin implements OnInit, OnDestroy {
 
     // Récupérer le premier restaurant disponible si aucun n'est configuré
     if (!adminRestaurantId) {
-      const { data: resto } = await supabase
-        .from('restaurants')
-        .select('id')
-        .order('id', { ascending: true })
-        .limit(1)
-        .maybeSingle();
-      if (resto?.id) {
-        adminRestaurantId = String(resto.id);
+      if (this.restaurantsDisponibles.length > 0) {
+        adminRestaurantId = String(this.restaurantsDisponibles[0].id);
+      } else {
+        const { data: resto } = await supabase
+          .from('restaurants')
+          .select('id')
+          .order('id', { ascending: true })
+          .limit(1)
+          .maybeSingle();
+        if (resto?.id) {
+          adminRestaurantId = String(resto.id);
+        }
       }
     }
 
@@ -234,6 +252,16 @@ export class Admin implements OnInit, OnDestroy {
       this.intervalId = null;
     }
     this.chatService.retirerListener(this.realtimeListener);
+  }
+
+  changerRestaurantSelectionne(nouveauId: any) {
+    this.restaurantId = String(nouveauId);
+    this.chargerCommandes();
+    this.chargerPlats();
+    this.chargerReservations();
+    this.chargerDemandesEvenement();
+    this.chargerConversations();
+    this.cdr.detectChanges();
   }
 
   getEtapes(commande: Commande): string[] {
