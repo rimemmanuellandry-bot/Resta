@@ -116,7 +116,7 @@ export class Admin implements OnInit, OnDestroy {
   }
 
   private realtimeListener = (nouveauMsg: Message, eventType: 'INSERT' | 'UPDATE' | 'DELETE' = 'INSERT') => {
-    const concerneAdmin = !this.restaurantId || !nouveauMsg.restaurant_id || String(nouveauMsg.restaurant_id) === String(this.restaurantId);
+    const concerneAdmin = this.restaurantId && String(nouveauMsg.restaurant_id) === String(this.restaurantId);
     if (concerneAdmin) {
       this.chargerConversations();
       if (this.discussionActive && this.discussionActive.client_id === nouveauMsg.client_id) {
@@ -166,6 +166,7 @@ export class Admin implements OnInit, OnDestroy {
 
     const { data: { session } } = await supabase.auth.getSession();
     let adminRestaurantId: string | null = null;
+    let estAdminDedie = false;
 
     if (session) {
       this.adminUserId = session.user.id;
@@ -176,11 +177,16 @@ export class Admin implements OnInit, OnDestroy {
         .maybeSingle();
       if (adminRecord && adminRecord.restaurant_id) {
         adminRestaurantId = String(adminRecord.restaurant_id);
+        estAdminDedie = true;
       }
     }
 
-    // Récupérer le premier restaurant disponible si aucun n'est configuré
-    if (!adminRestaurantId) {
+    if (adminRestaurantId && estAdminDedie) {
+      this.restaurantId = adminRestaurantId;
+      this.restaurantsDisponibles = this.restaurantsDisponibles.filter(
+        r => String(r.id) === adminRestaurantId
+      );
+    } else if (!adminRestaurantId) {
       if (this.restaurantsDisponibles.length > 0) {
         adminRestaurantId = String(this.restaurantsDisponibles[0].id);
       } else {
@@ -197,8 +203,12 @@ export class Admin implements OnInit, OnDestroy {
     }
 
     this.route.queryParams.subscribe(async params => {
-      const paramId = params['restaurant_id'] || null;
-      this.restaurantId = paramId || adminRestaurantId;
+      if (!estAdminDedie) {
+        const paramId = params['restaurant_id'] || null;
+        this.restaurantId = paramId || adminRestaurantId;
+      } else {
+        this.restaurantId = adminRestaurantId;
+      }
 
       if (!this.restaurantId) {
         const { data: resto } = await supabase
@@ -255,6 +265,9 @@ export class Admin implements OnInit, OnDestroy {
   }
 
   changerRestaurantSelectionne(nouveauId: any) {
+    if (this.restaurantsDisponibles.length <= 1) {
+      return;
+    }
     this.restaurantId = String(nouveauId);
     this.chargerCommandes();
     this.chargerPlats();

@@ -18,7 +18,9 @@ export class CommandeStatus implements OnInit, OnDestroy {
   etapesLivraison = ['reçue', 'en préparation', 'prête', 'en route', 'livrée'];
   statutActuel: string = 'reçue';
   commande: any = null;
+  maintenant: number = Date.now();
   private intervalId: any = null;
+  private timerSecondes: any = null;
 
   constructor(
     public panierService: PanierService,
@@ -33,6 +35,7 @@ export class CommandeStatus implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.maintenant = Date.now();
     this.route.queryParams.subscribe(params => {
       const paramId = params['id'] ? Number(params['id']) : null;
       if (paramId) {
@@ -50,12 +53,21 @@ export class CommandeStatus implements OnInit, OnDestroy {
     this.intervalId = setInterval(() => {
       this.chargerStatut();
     }, 3000);
+
+    this.timerSecondes = setInterval(() => {
+      this.maintenant = Date.now();
+      this.cdr.detectChanges();
+    }, 1000);
   }
 
   ngOnDestroy() {
     if (this.intervalId) {
       clearInterval(this.intervalId);
       this.intervalId = null;
+    }
+    if (this.timerSecondes) {
+      clearInterval(this.timerSecondes);
+      this.timerSecondes = null;
     }
   }
 
@@ -83,6 +95,45 @@ export class CommandeStatus implements OnInit, OnDestroy {
 
   getIndexEtape(): number {
     return this.etapes.indexOf(this.statutActuel);
+  }
+
+  secondesRestantes(): number {
+    if (!this.commande?.created_at) return 0;
+    const creee = new Date(this.commande.created_at).getTime();
+    const ecoule = this.maintenant - creee;
+    const restantMs = 60000 - ecoule;
+    return Math.max(0, Math.ceil(restantMs / 1000));
+  }
+
+  peutAnnuler(): boolean {
+    return this.statutActuel === 'reçue' && this.secondesRestantes() > 0;
+  }
+
+  async annulerCommande() {
+    if (!this.peutAnnuler() || !this.commande?.id) {
+      alert('Le délai d\'annulation d\'une minute est dépassé.');
+      return;
+    }
+
+    if (!confirm('Voulez-vous vraiment annuler votre commande ?')) {
+      return;
+    }
+
+    const { error } = await supabase
+      .from('commandes')
+      .update({ statut: 'annulée' })
+      .eq('id', this.commande.id);
+
+    if (error) {
+      alert('Impossible d\'annuler la commande.');
+      return;
+    }
+
+    this.statutActuel = 'annulée';
+    if (this.commande) {
+      this.commande.statut = 'annulée';
+    }
+    this.cdr.detectChanges();
   }
 
   telechargerFacture() {

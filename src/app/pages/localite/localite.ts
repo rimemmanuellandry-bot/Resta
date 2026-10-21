@@ -35,7 +35,8 @@ export class Localite implements OnInit {
       return;
     }
 
-    this.localites = [...new Set((data as { localite: string }[]).map(r => r.localite))];
+    this.localites = [...new Set((data as { localite: string }[]).map(r => r.localite))]
+      .filter(loc => loc && loc.trim().toLowerCase() !== 'campus');
     this.chargementTermine = true;
     this.cdr.detectChanges();
   }

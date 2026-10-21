@@ -311,18 +311,6 @@ export class ChatService {
 
     let { data, error } = await query;
 
-    // Si aucune donnée trouvée avec le filtre restaurant_id, essayer sans le filtre
-    if ((!data || data.length === 0) && restaurantId) {
-      const fallback = await supabase
-        .from('messages')
-        .select('*')
-        .eq('client_id', clientId)
-        .order('created_at', { ascending: true });
-      if (fallback.data && fallback.data.length > 0) {
-        data = fallback.data;
-      }
-    }
-
     if (error && !data) {
       console.warn('Erreur chargement messages :', error);
       return [];
@@ -448,17 +436,6 @@ export class ChatService {
     }
 
     let { data, error } = await query;
-
-    // Si aucune conversation trouvée avec restaurantId, récupérer toutes les conversations accessibles
-    if ((!data || data.length === 0) && restaurantId) {
-      const fallback = await supabase
-        .from('messages')
-        .select('*')
-        .order('created_at', { ascending: false });
-      if (fallback.data && fallback.data.length > 0) {
-        data = fallback.data;
-      }
-    }
 
     if (error && !data) {
       console.warn('Erreur chargement conversations admin :', error);

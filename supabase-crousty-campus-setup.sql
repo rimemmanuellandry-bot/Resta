@@ -12,9 +12,13 @@
 -- 4. Compléments & Accompagnements
 -- ==============================================================================
 
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 DO $$
 DECLARE
     v_resto_id BIGINT;
+    v_admin_uid UUID;
+    v_encrypted_pw TEXT;
 BEGIN
     -- 1. Création ou récupération du restaurant "Le Crousty du Campus"
     SELECT id INTO v_resto_id FROM public.restaurants WHERE nom ILIKE '%crousty%' LIMIT 1;
@@ -23,7 +27,7 @@ BEGIN
         INSERT INTO public.restaurants (nom, localite, adresse, telephone, latitude, longitude)
         VALUES (
             'Le Crousty du Campus',
-            'Campus',
+            'Kribi',
             'Cité Universitaire, Face Campus Principal (Manger Bien, Etudier Bien)',
             '696528610 / 691715554',
             4.0535,
@@ -36,14 +40,14 @@ BEGIN
         UPDATE public.restaurants
         SET 
             nom = 'Le Crousty du Campus',
-            localite = 'Campus',
+            localite = 'Kribi',
             adresse = 'Cité Universitaire, Face Campus Principal (Manger Bien, Etudier Bien)',
             telephone = '696528610 / 691715554',
             latitude = 4.0535,
             longitude = 9.7125
         WHERE id = v_resto_id;
 
-        RAISE NOTICE 'Restaurant "Le Crousty du Campus" mis à jour (ID: %)', v_resto_id;
+        RAISE NOTICE 'Restaurant "Le Crousty du Campus" mis à jour avec la localité Kribi (ID: %)', v_resto_id;
     END IF;
 
     -- 2. Suppression préventive des anciens plats de ce restaurant pour éviter les doublons
@@ -112,4 +116,94 @@ BEGIN
     (v_resto_id, 'Spaghetti Nature', 100, 'Compléments', 'Portion de spaghetti nature en complément pour sauces et viandes (à partir de 100 FCFA).', 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=500&q=80', false);
 
     RAISE NOTICE '38 plats insérés avec succès pour le restaurant Le Crousty du Campus.';
+
+    -- ==========================================================================
+    -- 4. CONFIGURATION DU COMPTE ADMINISTRATEUR DÉDIÉ (Le Crousty du Campus)
+    -- ==========================================================================
+    -- Email       : admin@gmail.com
+    -- Nom         : ISTEMA
+    -- Mot de passe: ISTEMA54321
+    -- Restaurant  : Le Crousty du Campus (ID: v_resto_id)
+    -- ==========================================================================
+
+    -- Hachage blowfish sécurisé conforme à Supabase Auth
+    v_encrypted_pw := crypt('ISTEMA54321', gen_salt('bf', 10));
+
+    SELECT id INTO v_admin_uid FROM auth.users WHERE email = 'admin@gmail.com';
+
+    IF v_admin_uid IS NULL THEN
+        v_admin_uid := gen_random_uuid();
+        INSERT INTO auth.users (
+            id,
+            instance_id,
+            email,
+            encrypted_password,
+            email_confirmed_at,
+            raw_app_meta_data,
+            raw_user_meta_data,
+            created_at,
+            updated_at,
+            role,
+            aud,
+            confirmation_token
+        ) VALUES (
+            v_admin_uid,
+            '00000000-0000-0000-0000-000000000000',
+            'admin@gmail.com',
+            v_encrypted_pw,
+            NOW(),
+            '{"provider":"email","providers":["email"]}'::jsonb,
+            '{"nom":"ISTEMA"}'::jsonb,
+            NOW(),
+            NOW(),
+            'authenticated',
+            'authenticated',
+            ''
+        );
+
+        INSERT INTO auth.identities (
+            id,
+            user_id,
+            identity_data,
+            provider,
+            provider_id,
+            last_sign_in_at,
+            created_at,
+            updated_at
+        ) VALUES (
+            gen_random_uuid(),
+            v_admin_uid,
+            json_build_object('sub', v_admin_uid, 'email', 'admin@gmail.com'),
+            'email',
+            v_admin_uid::text,
+            NOW(),
+            NOW(),
+            NOW()
+        );
+
+        RAISE NOTICE 'Compte administrateur ISTEMA (admin@gmail.com) créé dans auth.users (UID: %)', v_admin_uid;
+    ELSE
+        UPDATE auth.users
+        SET 
+            encrypted_password = v_encrypted_pw,
+            email_confirmed_at = COALESCE(email_confirmed_at, NOW()),
+            raw_user_meta_data = jsonb_set(COALESCE(raw_user_meta_data, '{}'::jsonb), '{nom}', '"ISTEMA"'),
+            updated_at = NOW()
+        WHERE id = v_admin_uid;
+
+        RAISE NOTICE 'Compte administrateur ISTEMA (admin@gmail.com) mis à jour (UID: %)', v_admin_uid;
+    END IF;
+
+    -- Liaison dans la table public.admins avec restaurant_id
+    IF NOT EXISTS (SELECT 1 FROM public.admins WHERE user_id = v_admin_uid) THEN
+        INSERT INTO public.admins (user_id, restaurant_id)
+        VALUES (v_admin_uid, v_resto_id);
+        RAISE NOTICE 'Admin ISTEMA rattaché avec succès au restaurant Le Crousty du Campus (ID: %)', v_resto_id;
+    ELSE
+        UPDATE public.admins
+        SET restaurant_id = v_resto_id
+        WHERE user_id = v_admin_uid;
+        RAISE NOTICE 'Admin ISTEMA mis à jour pour le restaurant Le Crousty du Campus (ID: %)', v_resto_id;
+    END IF;
+
 END $$;

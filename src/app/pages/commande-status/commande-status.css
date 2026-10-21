@@ -141,6 +141,31 @@
   box-shadow: 0 6px 16px rgba(26, 60, 46, 0.35);
 }
 
+.btn-annuler-commande {
+  background: #c0392b !important;
+  color: #fff !important;
+  font-weight: 700 !important;
+}
+
+.btn-annuler-commande:hover {
+  background: #e74c3c !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(192, 57, 43, 0.35) !important;
+}
+
+.message-annulee {
+  text-align: center;
+  background: #fff;
+  color: #c0392b;
+  font-weight: 600;
+  font-size: 1.05rem;
+  padding: 16px 20px;
+  border-radius: 14px;
+  margin: 24px 0 0;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid #c0392b;
+}
+
 @media (max-width: 480px) {
   .status-container {
     padding: 24px 14px 48px;

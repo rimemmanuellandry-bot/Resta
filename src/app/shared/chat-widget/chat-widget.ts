@@ -45,12 +45,12 @@ export class ChatWidget implements OnInit, OnDestroy {
 
   private routerSub?: Subscription;
   private realtimeListener = (nouveauMsg: Message, eventType: 'INSERT' | 'UPDATE' | 'DELETE' = 'INSERT') => {
-    // Si le widget n'est pas censé être visible (admin ou pages auth), ignorer
-    if (!this.estVisible) return;
+    // Si le widget n'est pas censé être visible ou si aucun restaurant n'est actif, ignorer
+    if (!this.estVisible || !this.restaurantId) return;
 
     if (
       nouveauMsg.client_id === this.userId &&
-      (!this.restaurantId || String(nouveauMsg.restaurant_id) === String(this.restaurantId))
+      String(nouveauMsg.restaurant_id) === String(this.restaurantId)
     ) {
       if (eventType === 'DELETE') {
         this.messages = this.messages.filter(m => m.id !== nouveauMsg.id);
@@ -135,15 +135,26 @@ export class ChatWidget implements OnInit, OnDestroy {
     this.chatService.retirerListener(this.realtimeListener);
   }
 
-  determinerVisibilite(url: string) {
+  async determinerVisibilite(url: string) {
     const chemin = (url || '').split('?')[0].replace(/\/+$/, '') || '/';
+    const pagesExclues = [
+      '',
+      '/',
+      '/connexion',
+      '/inscription',
+      '/bienvenue',
+      '/localite',
+      '/restaurant',
+      '/scan',
+    ];
     const estPageExclue =
-      chemin === '/' ||
-      chemin === '/connexion' ||
+      pagesExclues.includes(chemin) ||
       chemin.startsWith('/admin') ||
       chemin.startsWith('/statistiques');
 
-    this.estVisible = !estPageExclue && !this.estAdmin;
+    await this.determinerRestaurant(url);
+
+    this.estVisible = this.estConnecte && !this.estAdmin && !estPageExclue && !!this.restaurantId;
     if (!this.estVisible && this.ouvert) {
       this.ouvert = false;
     }
@@ -156,7 +167,7 @@ export class ChatWidget implements OnInit, OnDestroy {
       this.estConnecte = false;
       this.userId = null;
       this.estAdmin = false;
-      this.determinerVisibilite(this.router.url);
+      await this.determinerVisibilite(this.router.url);
       return;
     }
 
@@ -176,10 +187,10 @@ export class ChatWidget implements OnInit, OnDestroy {
       this.restaurantId = adminRecord.restaurant_id ? String(adminRecord.restaurant_id) : null;
     } else {
       this.estAdmin = false;
-      await this.determinerRestaurant();
+      await this.determinerRestaurant(this.router.url);
     }
 
-    this.determinerVisibilite(this.router.url);
+    await this.determinerVisibilite(this.router.url);
 
     // Initialiser le canal temps réel Supabase seulement si ce n'est pas un admin (l'admin gère via l'interface admin dédiée)
     if (!this.estAdmin) {
@@ -193,37 +204,45 @@ export class ChatWidget implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
-  async determinerRestaurant() {
-    if (this.panierService.restaurantId) {
-      this.restaurantId = this.panierService.restaurantId;
-    } else {
-      // 1. Commande récente
-      const { data: cmd } = await supabase
-        .from('commandes')
-        .select('restaurant_id')
-        .eq('user_id', this.userId)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+  async determinerRestaurant(url?: string) {
+    let nouveauRestoId: string | null = null;
 
-      if (cmd?.restaurant_id) {
-        this.restaurantId = String(cmd.restaurant_id);
-      } else {
-        // 2. Premier restaurant enregistré
-        const { data: resto } = await supabase
-          .from('restaurants')
-          .select('id, nom')
-          .limit(1)
-          .maybeSingle();
-        if (resto) {
-          this.restaurantId = String(resto.id);
-          this.nomRestaurant = resto.nom;
+    // 1. Extraire de l'URL si présent (ex: /menu?restaurant_id=2)
+    const urlCible = url || (typeof window !== 'undefined' ? window.location.href : '');
+    if (urlCible && urlCible.includes('restaurant_id=')) {
+      try {
+        const queryStr = urlCible.includes('?') ? urlCible.split('?')[1] : '';
+        const params = new URLSearchParams(queryStr);
+        const pId = params.get('restaurant_id');
+        if (pId) {
+          nouveauRestoId = String(pId);
         }
+      } catch {}
+    }
+
+    // 2. PanierService
+    if (!nouveauRestoId && this.panierService.restaurantId) {
+      nouveauRestoId = String(this.panierService.restaurantId);
+    }
+
+    // 3. SessionStorage (sauvegardé lors du clic sur un restaurant)
+    if (!nouveauRestoId && typeof sessionStorage !== 'undefined') {
+      const saved = sessionStorage.getItem('resta_selected_restaurant_id');
+      if (saved) {
+        nouveauRestoId = String(saved);
       }
     }
 
-    // Récupérer le nom du restaurant
+    const ancienRestoId = this.restaurantId;
+    this.restaurantId = nouveauRestoId;
+
     if (this.restaurantId) {
+      this.panierService.restaurantId = this.restaurantId;
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.setItem('resta_selected_restaurant_id', this.restaurantId);
+      }
+
+      // Récupérer le nom du restaurant
       const { data: resto } = await supabase
         .from('restaurants')
         .select('nom')
@@ -232,6 +251,14 @@ export class ChatWidget implements OnInit, OnDestroy {
       if (resto?.nom) {
         this.nomRestaurant = resto.nom;
       }
+    } else {
+      this.nomRestaurant = 'Resta Support';
+      this.messages = [];
+    }
+
+    // Si le restaurant actif a changé et qu'on est connecté en tant que client, recharger les messages du restaurant
+    if (ancienRestoId !== this.restaurantId && this.restaurantId && this.estConnecte && !this.estAdmin) {
+      await this.chargerHistorique();
     }
   }
 
@@ -243,11 +270,13 @@ export class ChatWidget implements OnInit, OnDestroy {
       this.nonLusWidget = 0;
       if (this.estConnecte) {
         if (!this.restaurantId) {
-          await this.determinerRestaurant();
+          await this.determinerRestaurant(this.router.url);
         }
-        await this.chargerHistorique();
-        await this.marquerLus();
-        this.defilerBas();
+        if (this.restaurantId) {
+          await this.chargerHistorique();
+          await this.marquerLus();
+          this.defilerBas();
+        }
       }
     }
   }
@@ -256,15 +285,17 @@ export class ChatWidget implements OnInit, OnDestroy {
     this.ouvert = false;
   }
 
-  ouvrirDepuisToast() {
+  async ouvrirDepuisToast() {
     this.ouvert = true;
     this.chatService.fermerToast();
     this.nonLusWidget = 0;
+    if (!this.restaurantId) {
+      await this.determinerRestaurant(this.router.url);
+    }
     if (this.restaurantId) {
-      this.chargerHistorique().then(() => {
-        this.marquerLus();
-        this.defilerBas();
-      });
+      await this.chargerHistorique();
+      await this.marquerLus();
+      this.defilerBas();
     }
   }
 

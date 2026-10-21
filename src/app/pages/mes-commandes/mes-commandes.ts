@@ -17,7 +17,9 @@ export class MesCommandes implements OnInit, OnDestroy {
   chargement = true;
   etapesSurPlace = ['reçue', 'en préparation', 'prête', 'servie'];
   etapesLivraison = ['reçue', 'en préparation', 'prête', 'en route', 'livrée'];
+  maintenant: number = Date.now();
   private intervalId: any = null;
+  private timerSecondes: any = null;
 
   constructor(
     private cdr: ChangeDetectorRef,
@@ -26,17 +28,28 @@ export class MesCommandes implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    this.maintenant = Date.now();
     this.chargerCommandes();
 
     this.intervalId = setInterval(() => {
       this.chargerCommandes();
     }, 5000);
+
+    // Compte à rebours à la seconde pour disparition nette après 1 minute (60s)
+    this.timerSecondes = setInterval(() => {
+      this.maintenant = Date.now();
+      this.cdr.detectChanges();
+    }, 1000);
   }
 
   ngOnDestroy() {
     if (this.intervalId) {
       clearInterval(this.intervalId);
       this.intervalId = null;
+    }
+    if (this.timerSecondes) {
+      clearInterval(this.timerSecondes);
+      this.timerSecondes = null;
     }
   }
 
@@ -78,16 +91,28 @@ export class MesCommandes implements OnInit, OnDestroy {
     return 'statut-' + statut.replace(/ /g, '-');
   }
 
-  peutAnnuler(commande: any): boolean {
-    if (commande.statut !== 'reçue') {
-      return false;
-    }
+  secondesRestantes(commande: any): number {
+    if (!commande?.created_at) return 0;
     const creee = new Date(commande.created_at).getTime();
-    const maintenant = Date.now();
-    return maintenant - creee < 60000;
+    const ecoule = this.maintenant - creee;
+    const restantMs = 60000 - ecoule;
+    return Math.max(0, Math.ceil(restantMs / 1000));
+  }
+
+  peutAnnuler(commande: any): boolean {
+    return commande?.statut === 'reçue' && this.secondesRestantes(commande) > 0;
   }
 
   async annuler(commande: any) {
+    if (!this.peutAnnuler(commande)) {
+      alert('Le délai d\'annulation d\'une minute est dépassé.');
+      return;
+    }
+
+    if (!confirm('Êtes-vous sûr de vouloir annuler votre commande ?')) {
+      return;
+    }
+
     const { error } = await supabase
       .from('commandes')
       .update({ statut: 'annulée' })
@@ -95,6 +120,7 @@ export class MesCommandes implements OnInit, OnDestroy {
 
     if (error) {
       console.error('Erreur lors de l\'annulation :', error);
+      alert('Erreur lors de l\'annulation de la commande.');
       return;
     }
 

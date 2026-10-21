@@ -12,6 +12,19 @@
     </div>
   </div>
 
+  <!-- Bouton annulation dans le délai d'une minute -->
+  <button
+    *ngIf="peutAnnuler()"
+    (click)="annulerCommande()"
+    class="btn-annuler-commande"
+  >
+    {{ 'mesCommandes.annuler' | translate }} ({{ secondesRestantes() }}s)
+  </button>
+
+  <p *ngIf="statutActuel === 'annulée'" class="message-annulee">
+    🚫 Cette commande a été annulée.
+  </p>
+
   <p *ngIf="statutActuel === 'servie'" class="message-final">
     {{ 'commandeStatus.messageServie' | translate }}
   </p>

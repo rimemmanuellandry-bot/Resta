@@ -130,6 +130,10 @@ export class Restaurant implements OnInit {
   }
 
   choisirRestaurant(restaurant: RestaurantInfo) {
+    this.panierService.restaurantId = String(restaurant.id);
+    if (typeof sessionStorage !== 'undefined') {
+      sessionStorage.setItem('resta_selected_restaurant_id', String(restaurant.id));
+    }
     if (this.intention === 'reservation') {
       this.router.navigate(['/reservation'], {
         queryParams: { restaurant_id: restaurant.id },

@@ -39,8 +39,9 @@
         *ngIf="peutAnnuler(commande)"
         (click)="annuler(commande)"
         class="btn-annuler"
+        [title]="'Délai restant pour annuler : ' + secondesRestantes(commande) + ' secondes'"
       >
-        {{ 'mesCommandes.annuler' | translate }}
+        {{ 'mesCommandes.annuler' | translate }} ({{ secondesRestantes(commande) }}s)
       </button>
       <button
         *ngIf="commande.statut === 'servie' || commande.statut === 'livrée'"
